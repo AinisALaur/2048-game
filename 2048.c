@@ -41,7 +41,7 @@ void DrawBoard(int *board){
 }
 
 
-void InitializeNewValue(int *board, int NumberOfValues, int *occupied, int *occupiedCells){
+void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
     int x, y;
     for(int i=0; i<NumberOfValues; ++i){
         int IsOccupied = 1;
@@ -49,18 +49,17 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupied, int *occu
             x = rand()%4;
             y = rand()%4;
 
-            if(*(occupied+4*x+y) == 0)
+            if(*(board+4*x+y) == 0)
                 IsOccupied = 0;
         }
         int newCellValue[10] = {4,4,4,4,2,2,2,2,2,2};
         int newIndex = rand()%10;
-        *(occupied+4*x+y) = 1;
         *(board+4*x+y) = newCellValue[newIndex];
         ++occupiedCells;
     }
 }
 
-void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
+void BoardMovesUp(int *board, int *occupiedCells){
     int moved_cells[4][4] = {};
     for(int i=3; i>0; --i){
         for(int x=0; x<4; ++x){
@@ -100,7 +99,7 @@ void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
         }
     }
 
-    InitializeNewValue(board, 1, occupied, occupiedCells);
+    //InitializeNewValue(board, 1, occupiedCells);
 }
 
 
@@ -108,12 +107,10 @@ void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
 
 int main(){
     srand(time(NULL));
-
-    int occupied[4][4] = {};
     int occupiedCells = 0;
     int board[4][4] = {};
 
-    InitializeNewValue(&board, 2, &occupied, &occupiedCells);
+    InitializeNewValue(&board, 6, &occupiedCells);
 
 
     int GameContinues = 1;
@@ -132,7 +129,7 @@ int main(){
             if(move == 'U' || move == 'D' || move == 'R' || move == 'L'){
                 printf("Move registered!\n");
                 if(move == 'U')
-                    BoardMovesUp(&board, &occupied, &occupiedCells);
+                    BoardMovesUp(&board, &occupiedCells);
 
 
             }
@@ -149,9 +146,6 @@ int main(){
 
         printf("\n");
    }
-
-
-
 
     return 0;
 }
