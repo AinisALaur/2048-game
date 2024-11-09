@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
 #define SQUARESIZE 10
 
 int GetNumSize(int value){
@@ -9,7 +11,6 @@ int GetNumSize(int value){
         value/=10;
     }
     return t;
-
 }
 
 
@@ -29,14 +30,10 @@ void DrawBoard(int board[4][4]){
                         else
                             printf("#%8d#", board[t][r]);
                     }
-
                     if(h>0 && h<SQUARESIZE/2-1 && h!=SQUARESIZE/4 && i==0)
                         printf("#%8s#", " ");
-
-
                     if(h==0 || h==SQUARESIZE/2-1)
                         printf("#");
-
                 }printf(" ");
             }printf("\n");
         }printf("\n");
@@ -46,15 +43,35 @@ void DrawBoard(int board[4][4]){
 
 
 int main(){
-    int t = 1;
+    srand(time(NULL));
+
+    int occupied[4][4] = {};
+    int occupiedCells = 0;
+
     int board[4][4] = {};
-    for(int i=0; i<4; ++i){
-        for(int x=0; x<4; ++x){
-            board[i][x] = t;
-            ++t;
+    int x, y;
+
+    for(int i=0; i<2; ++i){
+
+        int IsOccupied = 1;
+        while(IsOccupied){
+            x = rand()%5;
+            y = rand()%5;
+
+            if(occupied[x][y] == 0)
+                IsOccupied = 0;
         }
 
+        int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2};
+        int newIndex = rand()%11;
+
+        occupied[x][y] = -1;
+        board[x][y] = newCellValue[newIndex];
+        ++occupiedCells;
+
     }
+
+
 
     DrawBoard(board);
 
