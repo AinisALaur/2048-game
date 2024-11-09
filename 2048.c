@@ -43,6 +43,27 @@ void DrawBoard(int *board){
 }
 
 
+void InitializeNewValue(int *board, int NumberOfValues, int *occupied, int *occupiedCells){
+    int x,y;
+    for(int i=0; i<NumberOfValues; ++i){
+        int IsOccupied = 1;
+        while(IsOccupied){
+            x = rand()%5;
+            y = rand()%5;
+
+            if(*(occupied+4*y+x) == 0)
+                IsOccupied = 0;
+        }
+        int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2};
+        int newIndex = rand()%10;
+        *(occupied+4*y+x) = -1;
+        *(board+4*y+x) = newCellValue[newIndex];
+        ++occupiedCells;
+    }
+
+}
+
+
 
 
 int main(){
@@ -52,26 +73,9 @@ int main(){
     int occupiedCells = 0;
 
     int board[4][4] = {};
-    int x, y;
 
-    for(int i=0; i<2; ++i){
-        int IsOccupied = 1;
-        while(IsOccupied){
-            x = rand()%5;
-            y = rand()%5;
-
-            if(occupied[x][y] == 0)
-                IsOccupied = 0;
-        }
-        int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2};
-        int newIndex = rand()%11;
-        occupied[x][y] = -1;
-        board[x][y] = newCellValue[newIndex];
-        ++occupiedCells;
-    }
-
-
-    DrawBoard(board);
+    InitializeNewValue(&board, 2, &occupied, &occupiedCells);
+    DrawBoard(&board);
 
 
 
