@@ -64,13 +64,13 @@ void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
     for(int i=3; i>0; --i){
         for(int x=0; x<4; ++x){
             if(*(board+4*i+x)!=0){
-                    printf("found %d at coordinates %d %d\n", *(board+4*i+x), i, x);
+                printf("Found %d at coordiantes (%d; %d)\n", *(board+4*i+x), i, x);
+                for(int j=i-1; j>=0; --j){
+                    if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x)){
+                        printf("    Found %d at coordiantes (%d; %d)\n", *(board+4*j+x), j, x);
+                        break;
 
 
-//                for(int j=i; j>0; --j){
-//
-//                    if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x)){
-//
 //                       *(board+4*j+x) = (*(board+4*j+x)) * (*(board+4*i+x));
 //                       *(board+4*i+x) = 0;
 //                       *(occupied+4*i+x) = 0;
@@ -78,7 +78,7 @@ void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
 //                       *occupiedCells--;
 //                        break;
 //
-//                    }
+                    }
 
 
 //                    else if(*(board+4*j+x)!=0 && *(board+4*j+x)!=*(board+4*i+x)){
@@ -97,7 +97,7 @@ void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
 //                       break;
 //                    }
                 }
-//            }
+            }
         }
     }
     //InitializeNewValue(*board, 1, *occupied, *occupiedCells);
