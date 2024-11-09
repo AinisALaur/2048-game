@@ -52,7 +52,7 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupied, int *occu
             if(*(occupied+4*x+y) == 0)
                 IsOccupied = 0;
         }
-        int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2};
+        int newCellValue[10] = {4,4,4,4,2,2,2,2,2,2};
         int newIndex = rand()%10;
         *(occupied+4*x+y) = 1;
         *(board+4*x+y) = newCellValue[newIndex];
@@ -61,40 +61,46 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupied, int *occu
 }
 
 void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
+    int moved_cells[4][4] = {};
     for(int i=3; i>0; --i){
         for(int x=0; x<4; ++x){
             if(*(board+4*i+x)!=0){
                 for(int j=i-1; j>=0; --j){
-                    if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x)){
+                    if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x) && moved_cells[i][x]==0){
                        *(board+4*j+x) = (*(board+4*j+x)) * (*(board+4*i+x));
                        *(board+4*i+x) = 0;
-                       *(occupied+4*i+x) = 0;
-                       *(occupied+4*j+x) = 1;
                        *occupiedCells--;
+                        moved_cells[j][x] = 1;
                         break;
                     }
 
-
-//                    else if(*(board+4*j+x)!=0 && *(board+4*j+x)!=*(board+4*i+x)){
-//                       *(board+4*(j-1)+x) = *(board+4*i+x);
-//                       *(board+4*i+x) = 0;
-//                       *(occupied+4*i+x) = 0;
-//                       *(occupied+4*(j-1)+x) = 1;
-//                       break;
-//                    }
-//
-//                    else{
-//                       *(board+x) = *(board+4*i+x);
-//                       *(board+4*i+x) = 0;
-//                       *(occupied+4*i+x) = 0;
-//                       *(occupied+x) = 1;
-//                       break;
-//                    }
+                    else if(*(board+4*j+x)!=0 && *(board+4*j+x)!=*(board+4*i+x) && moved_cells[i][x]==0){
+                       int new_value = *(board+4*i+x);
+                       *(board+4*i+x) = 0;
+                       *(board+4*(j+1)+x) = new_value;
+                       moved_cells[j+1][x] = 1;
+                       break;
+                    }
                 }
             }
         }
     }
-    //InitializeNewValue(*board, 1, *occupied, *occupiedCells);
+
+    //everything moves up
+    for(int i=1; i<4; ++i){
+        for(int x=0; x<4; ++x){
+            int cellValue = *(board+4*i+x);
+            if(cellValue !=0){
+                *(board+4*i+x) = 0;
+                int ValuesYcord = 0;
+                while(*(board+4*ValuesYcord+x)!=0)
+                    ValuesYcord++;
+                *(board+4*ValuesYcord+x) = cellValue;
+            }
+        }
+    }
+
+    InitializeNewValue(board, 1, occupied, occupiedCells);
 }
 
 
