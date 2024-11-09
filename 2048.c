@@ -7,14 +7,12 @@
 
 int GetNumSize(int value){
     int t = 0;
-
     while(value>0){
         t++;
         value/=10;
     }
     return t;
 }
-
 
 void DrawBoard(int *board){
     for(int t=0; t<4; ++t){ //how many total rows
@@ -60,7 +58,6 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupied, int *occu
         *(board+4*y+x) = newCellValue[newIndex];
         ++occupiedCells;
     }
-
 }
 
 
@@ -71,11 +68,39 @@ int main(){
 
     int occupied[4][4] = {};
     int occupiedCells = 0;
-
     int board[4][4] = {};
 
     InitializeNewValue(&board, 2, &occupied, &occupiedCells);
     DrawBoard(&board);
+
+    printf("u - up\n");
+    printf("d - down\n");
+    printf("l - left\n");
+    printf("r - right\n");
+
+    int GameContinues = 1;
+    char move, clearBuffer;
+    while(GameContinues){
+        printf("Enter your move: ");
+
+        if(scanf("%c", &move)==1 && getchar()=='\n'){
+            move = toupper(move);
+            if(move == 'U' || move == 'D' || move == 'R' || move == 'L'){
+                printf("Move registered!\n");
+
+            }
+            else{
+                printf("Bad input!\n");
+                while(clearBuffer=getchar()!='\n' && clearBuffer!=EOF);
+            }
+        }else{
+            printf("Bad input!\n");
+            while(clearBuffer=getchar()!='\n' && clearBuffer!=EOF);
+        }
+
+
+    }
+
 
 
 
