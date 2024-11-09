@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<time.h>
 #define SQUARESIZE 10
-#define COLOR  "\x1B[31m"
+#define COLOR  "\x1B[36m"
 #define COLOR_RESET  "\x1B[37m"
 
 int GetNumSize(int value){
@@ -46,10 +46,10 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupied, int *occu
     for(int i=0; i<NumberOfValues; ++i){
         int IsOccupied = 1;
         while(IsOccupied){
-            x = rand()%5;
-            y = rand()%5;
+            x = rand()%4;
+            y = rand()%4;
 
-            if(*(occupied+4*y+x) == 0)
+            if(*(occupied+4*x+y) == 0)
                 IsOccupied = 0;
         }
         int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2};
@@ -64,20 +64,14 @@ void BoardMovesUp(int *board, int *occupied, int *occupiedCells){
     for(int i=3; i>0; --i){
         for(int x=0; x<4; ++x){
             if(*(board+4*i+x)!=0){
-                printf("Found %d at coordiantes (%d; %d)\n", *(board+4*i+x), i, x);
                 for(int j=i-1; j>=0; --j){
                     if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x)){
-                        printf("    Found %d at coordiantes (%d; %d)\n", *(board+4*j+x), j, x);
+                       *(board+4*j+x) = (*(board+4*j+x)) * (*(board+4*i+x));
+                       *(board+4*i+x) = 0;
+                       *(occupied+4*i+x) = 0;
+                       *(occupied+4*j+x) = 1;
+                       *occupiedCells--;
                         break;
-
-
-//                       *(board+4*j+x) = (*(board+4*j+x)) * (*(board+4*i+x));
-//                       *(board+4*i+x) = 0;
-//                       *(occupied+4*i+x) = 0;
-//                       *(occupied+4*j+x) = 1;
-//                       *occupiedCells--;
-//                        break;
-//
                     }
 
 
@@ -114,23 +108,17 @@ int main(){
     int board[4][4] = {};
 
     InitializeNewValue(&board, 2, &occupied, &occupiedCells);
-    //DrawBoard(&board);
 
-    printf("u - up\n");
-    printf("d - down\n");
-    printf("l - left\n");
-    printf("r - right\n");
 
     int GameContinues = 1;
     char move, clearBuffer;
     while(GameContinues){
-        for(int i=0; i<4; ++i){
-            for(int x=0; x<4; ++x){
-                printf("%d ", board[i][x]);
+        DrawBoard(&board);
 
-            }printf("\n");
-        }
-
+        printf("u - up\n");
+        printf("d - down\n");
+        printf("l - left\n");
+        printf("r - right\n");
         printf("Enter your move: ");
 
         if(scanf("%c", &move)==1 && getchar()=='\n'){
@@ -154,8 +142,6 @@ int main(){
         }
 
         printf("\n");
-        //DrawBoard(&board);
-
    }
 
 
