@@ -61,23 +61,27 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
 
 void BoardMovesUp(int *board, int *occupiedCells){
     int moved_cells[4][4] = {};
-    for(int i=3; i>0; --i){
-        for(int x=0; x<4; ++x){
-            if(*(board+4*i+x)!=0){
-                for(int j=i-1; j>=0; --j){
+    for(int i=3; i>0; --i){ //starts at bottom row and progresses up
+        for(int x=0; x<4; ++x){ //goes trough row's elements
+            if(*(board+4*i+x)!=0){ // if element is not 0 we look if any non 0 elements exist above
+                for(int j=i-1; j>=0; --j){ // loop that checks all elements above
+
+
+                    //if finds the same element above it
                     if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x) && moved_cells[i][x]==0){
                        *(board+4*j+x) = (*(board+4*j+x)) * (*(board+4*i+x));
                        *(board+4*i+x) = 0;
                        *occupiedCells--;
-                        moved_cells[j][x] = 1;
+                        moved_cells[j][x] = 1; // make sure to not move already moved values
                         break;
                     }
 
+                    //if finds a non 0 element that is not equal to original
                     else if(*(board+4*j+x)!=0 && *(board+4*j+x)!=*(board+4*i+x) && moved_cells[i][x]==0){
                        int new_value = *(board+4*i+x);
                        *(board+4*i+x) = 0;
                        *(board+4*(j+1)+x) = new_value;
-                       moved_cells[j+1][x] = 1;
+                       moved_cells[j+1][x] = 1; // make sure to not move already moved values
                        break;
                     }
                 }
@@ -85,21 +89,22 @@ void BoardMovesUp(int *board, int *occupiedCells){
         }
     }
 
-    //everything moves up
-    for(int i=1; i<4; ++i){
-        for(int x=0; x<4; ++x){
+    //Move all elements up
+    for(int i=1; i<4; ++i){ // start at second row from top and progress down
+        for(int x=0; x<4; ++x){ // go through all row's elements
             int cellValue = *(board+4*i+x);
-            if(cellValue !=0){
+            if(cellValue !=0){ // if element is not zero move it as high up as possible
                 *(board+4*i+x) = 0;
                 int ValuesYcord = 0;
-                while(*(board+4*ValuesYcord+x)!=0)
+
+                while(*(board+4*ValuesYcord+x)!=0) // increasing it's y coordinate to the maximum
                     ValuesYcord++;
                 *(board+4*ValuesYcord+x) = cellValue;
             }
         }
     }
 
-    //InitializeNewValue(board, 1, occupiedCells);
+    //InitializeNewValue(board, 1, occupiedCells); // add new value to board
 }
 
 
