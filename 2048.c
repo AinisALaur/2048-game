@@ -86,7 +86,7 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
 
                 while(1){ // loop that checks all elements above/below
 
-                    if(start>end && j<=0 || start<end && j>=end){
+                    if(start>end && j<0 || start<end && j>end){
                         break;
                     }
 
@@ -127,6 +127,8 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
             ++i;
     }
 
+
+    //assign appropriate i value for upcoming loop
     if(start>end)
         i = 1;
     else
@@ -135,7 +137,7 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
     //Move all elements up/down
     while(1){ // start at second row from top and progress down or second row from bottom
 
-
+        //break function when needed
         if(start>end && i>3 || start<end && i<0){
             break;
         }
@@ -164,6 +166,8 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
             }
         }
 
+
+       // move up a row or down
        if(start>end)
           ++i;
        else
@@ -171,7 +175,8 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
 
     }
 
-    //InitializeNewValue(board, 1, occupiedCells); // add new value to board
+    InitializeNewValue(board, 1, occupiedCells); // add new value to board
+
 }
 
 
@@ -182,7 +187,7 @@ int main(){
     int occupiedCells = 0;
     int board[4][4] = {};
 
-    InitializeNewValue(&board, 6, &occupiedCells);
+    InitializeNewValue(&board, 3, &occupiedCells);
 
 
     int GameContinues = 1;
@@ -202,11 +207,13 @@ int main(){
                 printf("Move registered!\n");
 
 
-                if(move == 'U')
+                if(move == 'U'){
                     BoardMovesVertically(&board, &occupiedCells, 3, 0);
+                }
 
-                if(move == 'D')
+                if(move == 'D'){
                     BoardMovesVertically(&board, &occupiedCells, 0, 3);
+                }
 
 
             }
