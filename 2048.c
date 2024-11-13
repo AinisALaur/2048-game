@@ -59,13 +59,36 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
     }
 }
 
-void BoardMovesUp(int *board, int *occupiedCells){
+void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
     int moved_cells[4][4] = {};
-    for(int i=3; i>0; --i){ //starts at bottom row and progresses up
-        for(int x=0; x<4; ++x){ //goes trough row's elements
-            if(*(board+4*i+x)!=0){ // if element is not 0 we look if any non 0 elements exist above
-                for(int j=i-1; j>=0; --j){ // loop that checks all elements above
 
+    int i = start;
+
+    while(1){ //starts at bottom row and progresses up
+
+        //check when to stop cycle
+        if(start>end && i<=0 || start<end && i>=end){
+            break;
+        }
+
+
+        for(int x=0; x<4; ++x){ //goes trough row's elements
+            if(*(board+4*i+x)!=0){ // if element is not 0 we look if any non 0 elements exist above/below
+
+
+                //assign j accordingly
+                int  j;
+                if(start>end)
+                    j = i-1;
+                else
+                    j = i+1;
+
+
+                while(1){ // loop that checks all elements above/below
+
+                    if(start>end && j<=0 || start<end && j>=end){
+                        break;
+                    }
 
                     //if finds the same element above it
                     if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x) && moved_cells[i][x]==0){
@@ -84,24 +107,68 @@ void BoardMovesUp(int *board, int *occupiedCells){
                        moved_cells[j+1][x] = 1; // make sure to not move already moved values
                        break;
                     }
+
+
+                    //move to upper or lower row
+                    if(start>end)
+                        --j;
+                    else
+                        ++j;
+
                 }
             }
         }
+
+
+        //move up or down
+        if(start>end)
+            --i;
+        else
+            ++i;
     }
 
-    //Move all elements up
-    for(int i=1; i<4; ++i){ // start at second row from top and progress down
+    if(start>end)
+        i = 1;
+    else
+        i = 2;
+
+    //Move all elements up/down
+    while(1){ // start at second row from top and progress down or second row from bottom
+
+
+        if(start>end && i>3 || start<end && i<0){
+            break;
+        }
+
+
         for(int x=0; x<4; ++x){ // go through all row's elements
             int cellValue = *(board+4*i+x);
-            if(cellValue !=0){ // if element is not zero move it as high up as possible
+            if(cellValue !=0){ // if element is not zero move it as high/low up as possible
                 *(board+4*i+x) = 0;
-                int ValuesYcord = 0;
 
-                while(*(board+4*ValuesYcord+x)!=0) // increasing it's y coordinate to the maximum
-                    ValuesYcord++;
+
+                int ValuesYcord;
+
+                if(start>end){
+                    ValuesYcord = 0;
+                    while(*(board+4*ValuesYcord+x)!=0 && ValuesYcord<=3) // increasing it's y coordinate to the maximum
+                        ValuesYcord++;
+                }
+                else{
+                    ValuesYcord = 3;
+                    while(*(board+4*ValuesYcord+x)!=0 && ValuesYcord>=0) // decreasing it's y coordinate to the maximum
+                        ValuesYcord--;
+                }
+
                 *(board+4*ValuesYcord+x) = cellValue;
             }
         }
+
+       if(start>end)
+          ++i;
+       else
+          --i;
+
     }
 
     //InitializeNewValue(board, 1, occupiedCells); // add new value to board
@@ -133,8 +200,13 @@ int main(){
             move = toupper(move);
             if(move == 'U' || move == 'D' || move == 'R' || move == 'L'){
                 printf("Move registered!\n");
+
+
                 if(move == 'U')
-                    BoardMovesUp(&board, &occupiedCells);
+                    BoardMovesVertically(&board, &occupiedCells, 3, 0);
+
+                if(move == 'D')
+                    BoardMovesVertically(&board, &occupiedCells, 0, 3);
 
 
             }
