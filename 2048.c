@@ -65,7 +65,6 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
 
 void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
     int moved_cells[4][4] = {};
-
     int i = start;
 
     while(1){ //starts at bottom row and progresses up
@@ -75,18 +74,11 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
             break;
         }
 
-
         for(int x=0; x<4; ++x){ //goes trough row's elements
             if(*(board+4*i+x)!=0){ // if element is not 0 we look if any non 0 elements exist above/below
 
-
                 //assign j accordingly
-                int  j;
-                if(start>end)
-                    j = i-1;
-                else
-                    j = i+1;
-
+                int  j = start>end? i-1: i+1;
 
                 while(1){ // loop that checks all elements above/below
 
@@ -96,7 +88,7 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
 
                     //if finds the same element above it
                     if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x) && moved_cells[i][x]==0){
-                       *(board+4*j+x) = (*(board+4*j+x)) * (*(board+4*i+x));
+                       *(board+4*j+x) = (*(board+4*j+x)) * 2;
                        *(board+4*i+x) = 0;
                        *occupiedCells--;
                         moved_cells[j][x] = 1; // make sure to not move already moved values
@@ -114,33 +106,19 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
                        break;
                     }
 
-
                     //move to upper or lower row
-                    if(start>end)
-                        --j;
-                    else
-                        ++j;
-
+                    start>end? --j:++j;
                 }
             }
         }
 
-
         //move up or down
-        if(start>end)
-            --i;
-        else
-            ++i;
+        start>end? --i: ++i;
     }
 
 
     //assign appropriate i value for upcoming loop
-
-
-    if(start>end)
-        i = 1;
-    else
-        i = 2;
+    i=start>end?1:2;
 
     //Move all elements up/down
     while(1){ // start at second row from top and progress down or second row from bottom
@@ -149,7 +127,6 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
         if(start>end && i>3 || start<end && i<0){
             break;
         }
-
 
         for(int x=0; x<4; ++x){ // go through all row's elements
             int cellValue = *(board+4*i+x);
@@ -172,14 +149,12 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
         }
 
        // move up a row or down
-       if(start>end)
-          ++i;
-       else
-          --i;
+       start>end? ++i:--i;
+
     }
 
-    InitializeNewValue(board, 1, occupiedCells); // add new value to board
 
+    InitializeNewValue(board, 1, occupiedCells); // add new value to board
 }
 
 
@@ -188,14 +163,9 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
 int main(){
     srand(time(NULL));
     int occupiedCells = 0;
-    int board[4][4] = {
-//        {5,6,7,8},
-//        {0,0,0,0},
-//        {0,0,0,0},
-//        {1,2,3,4}
-    };
+    int board[4][4] = {};
 
-    InitializeNewValue(&board, 1, &occupiedCells);
+    InitializeNewValue(&board, 3, &occupiedCells);
 
     int GameContinues = 1;
     char move, clearBuffer;
@@ -209,8 +179,6 @@ int main(){
             }printf("\n");
 
         }
-
-
 
         printf("u - up\n");
         printf("d - down\n");
