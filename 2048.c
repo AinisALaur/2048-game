@@ -5,6 +5,10 @@
 #define COLOR  "\x1B[36m"
 #define COLOR_RESET  "\x1B[37m"
 
+//TODO add new variable if move changed something
+
+
+
 int GetNumSize(int value){
     int t = 0;
     while(value>0){
@@ -52,7 +56,7 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
             if(*(board+4*x+y) == 0)
                 IsOccupied = 0;
         }
-        int newCellValue[10] = {4,4,4,4,2,2,2,2,2,2};
+        int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2};
         int newIndex = rand()%10;
         *(board+4*x+y) = newCellValue[newIndex];
         ++occupiedCells;
@@ -103,8 +107,10 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
                     else if(*(board+4*j+x)!=0 && *(board+4*j+x)!=*(board+4*i+x) && moved_cells[i][x]==0){
                        int new_value = *(board+4*i+x);
                        *(board+4*i+x) = 0;
-                       *(board+4*(j+1)+x) = new_value;
-                       moved_cells[j+1][x] = 1; // make sure to not move already moved values
+                       int Yvalue = start>end? j+1: j-1;
+
+                       *(board+4*Yvalue+x) = new_value;
+                       moved_cells[Yvalue][x] = 1; // make sure to not move already moved values
                        break;
                     }
 
@@ -129,6 +135,8 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
 
 
     //assign appropriate i value for upcoming loop
+
+
     if(start>end)
         i = 1;
     else
@@ -147,18 +155,15 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
             int cellValue = *(board+4*i+x);
             if(cellValue !=0){ // if element is not zero move it as high/low up as possible
                 *(board+4*i+x) = 0;
-
-
                 int ValuesYcord;
-
                 if(start>end){
                     ValuesYcord = 0;
-                    while(*(board+4*ValuesYcord+x)!=0 && ValuesYcord<=3) // increasing it's y coordinate to the maximum
+                    while(*(board+4*ValuesYcord+x)!=0) // increasing it's y coordinate to the maximum
                         ValuesYcord++;
                 }
                 else{
                     ValuesYcord = 3;
-                    while(*(board+4*ValuesYcord+x)!=0 && ValuesYcord>=0) // decreasing it's y coordinate to the maximum
+                    while(*(board+4*ValuesYcord+x)!=0) // decreasing it's y coordinate to the maximum
                         ValuesYcord--;
                 }
 
@@ -166,13 +171,11 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
             }
         }
 
-
        // move up a row or down
        if(start>end)
           ++i;
        else
           --i;
-
     }
 
     InitializeNewValue(board, 1, occupiedCells); // add new value to board
@@ -185,15 +188,29 @@ void BoardMovesVertically(int *board, int *occupiedCells, int start, int end){
 int main(){
     srand(time(NULL));
     int occupiedCells = 0;
-    int board[4][4] = {};
+    int board[4][4] = {
+//        {5,6,7,8},
+//        {0,0,0,0},
+//        {0,0,0,0},
+//        {1,2,3,4}
+    };
 
-    InitializeNewValue(&board, 3, &occupiedCells);
-
+    InitializeNewValue(&board, 1, &occupiedCells);
 
     int GameContinues = 1;
     char move, clearBuffer;
     while(GameContinues){
-        DrawBoard(&board);
+
+        //DrawBoard(&board);
+
+        for(int i=0; i<4; ++i){
+            for(int x=0; x<4; ++x){
+                printf("%d ", board[i][x]);
+            }printf("\n");
+
+        }
+
+
 
         printf("u - up\n");
         printf("d - down\n");
