@@ -62,41 +62,42 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
 }
 
 void BoardMovesVertically(int *board, int *occupiedCells, char direction){
+
     int moved_cells[4][4] = {};
-    int i = direction=='U'?3:0;
+    int y = direction=='U'?3:0;
 
     while(1){ //starts at bottom row and progresses up
 
         //check when to stop cycle
-        if(direction=='U' && i<=0 || direction=='D' && i>=3){
+        if(direction=='U' && y<=0 || direction=='D' && y>=3){
             break;
         }
 
         for(int x=0; x<4; ++x){ //goes trough row's elements
-            if(*(board+4*i+x)!=0){ // if element is not 0 we look if any non 0 elements exist above/below
+            if(*(board+4*y+x)!=0){ // if element is not 0 we look if any non 0 elements exist above/below
 
                 //assign j accordingly
-                int  j = direction=='U'? i-1: i+1;
+                int  y1 = direction=='U'? y-1: y+1;
 
                 while(1){ // loop that checks all elements above/below
-                    if(direction=='U' && j<0 || direction=='D' && j>3){
+                    if(direction=='U' && y1<0 || direction=='D' && y1>3){
                         break;
                     }
 
                     //if finds the same element above it
-                    if(*(board+4*j+x)!=0 && *(board+4*j+x)==*(board+4*i+x) && moved_cells[i][x]==0){
-                       *(board+4*j+x) = (*(board+4*j+x)) * 2;
-                       *(board+4*i+x) = 0;
+                    if(*(board+4*y1+x)!=0 && *(board+4*y1+x)==*(board+4*y+x) && moved_cells[y][x]==0){
+                       *(board+4*y1+x) = (*(board+4*y1+x)) * 2;
+                       *(board+4*y+x) = 0;
                        *occupiedCells--;
-                        moved_cells[j][x] = 1; // make sure to not move already moved values
+                        moved_cells[y1][x] = 1; // make sure to not move already moved values
                         break;
                     }
 
                     //if finds a non 0 element that is not equal to original
-                    else if(*(board+4*j+x)!=0 && *(board+4*j+x)!=*(board+4*i+x) && moved_cells[i][x]==0){
-                       int new_value = *(board+4*i+x);
-                       *(board+4*i+x) = 0;
-                       int Yvalue = direction=='U'? j+1: j-1;
+                    else if(*(board+4*y1+x)!=0 && *(board+4*y1+x)!=*(board+4*y+x) && moved_cells[y][x]==0){
+                       int new_value = *(board+4*y+x);
+                       *(board+4*y+x) = 0;
+                       int Yvalue = direction=='U'? y1+1: y1-1;
 
                        *(board+4*Yvalue+x) = new_value;
                        moved_cells[Yvalue][x] = 1; // make sure to not move already moved values
@@ -104,34 +105,33 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction){
                     }
 
                     //move to upper or lower row
-                    direction=='U'? --j:++j;
+                    direction=='U'? --y1:++y1;
                 }
             }
         }
 
         //move up or down
-        direction=='U'? --i: ++i;
+        direction=='U'? --y: ++y;
     }
 
-
     //assign appropriate i value for upcoming loop
-    i=direction=='U'?1:2;
+    y=direction=='U'?1:2;
 
     //Move all elements up/down
     while(1){ // start at second row from top and progress down or second row from bottom
 
         //break function when needed
-        if(direction=='U' && i>3 || direction=='D' && i<0){
+        if(direction=='U' && y>3 || direction=='D' && y<0){
             break;
         }
 
         for(int x=0; x<4; ++x){ // go through all row's elements
-            int cellValue = *(board+4*i+x);
+            int cellValue = *(board+4*y+x);
             if(cellValue !=0){ // if element is not zero move it as high/low up as possible
-                *(board+4*i+x) = 0;
-                int ValuesYcord; //=i
+                *(board+4*y+x) = 0;
+                int ValuesYcord;
                 if(direction=='U'){
-                    ValuesYcord = 0; //delete
+                    ValuesYcord = 0;
                     while(*(board+4*ValuesYcord+x)!=0) // increasing it's y coordinate to the maximum
                         ValuesYcord++;
                 }
@@ -145,7 +145,7 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction){
             }
         }
        // move up a row or down
-       direction=='U'? ++i:--i;
+       direction=='U'? ++y:--y;
     }
 
     InitializeNewValue(board, 1, occupiedCells); // add new value to board
@@ -153,95 +153,105 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction){
 
 void boardMovesHorizontally(int *board, int *occupiedCells, char direction){
     int moved_cells[4][4] = {};
-    int i = direction == 'L'? 3: 0;
+    int x = direction == 'L'? 3: 0;
 
     //move left or right
     while(1){
 
-        if(direction == 'L' && i<1 || direction=='R' && i>3)
+        if(direction == 'L' && x<1 || direction=='R' && x>3)
             break;
 
-        for(int x=0; x<4; ++x){
-            if(*(board+4*x+i) != 0){
-                int j = direction=='L'? i-1: i+1;
+        for(int y=0; y<4; ++y){
+            if(*(board+4*y+x) != 0){
+                int x1 = direction=='L'? x-1: x+1;
                 while(1){
-                    if(direction=='L' && j<0 || direction=='R' && j>3)
+                    if(direction=='L' && x1<0 || direction=='R' && x1>3)
                         break;
 
-                    if(*(board+4*x+j)!=0 && *(board+4*x+j)==*(board+4*x+i) && moved_cells[x][i]==0){
-                       *(board+4*x+j) = (*(board+4*x+i)) * 2;
-                       *(board+4*x+i) = 0;
+                    if(*(board+4*y+x1)!=0 && *(board+4*y+x1)==*(board+4*y+x) && moved_cells[y][x]==0){
+                       *(board+4*y+x1) = (*(board+4*y+x)) * 2;
+                       *(board+4*y+x) = 0;
                        *occupiedCells--;
-                        moved_cells[x][j] = 1;
+                        moved_cells[y][x1] = 1;
                         break;
                     }
 
 
-                    if(*(board+4*x+j)!=0 && *(board+4*x+j)!=*(board+4*x+i) && moved_cells[x][i]==0){
-                       int value = *(board+4*x+i);
-                       *(board+4*x+i) = 0;
-                       int Xvalue = direction=='L'?j+1:j-1;
+                    if(*(board+4*y+x1)!=0 && *(board+4*y+x1)!=*(board+4*y+x) && moved_cells[y][x]==0){
+                       int value = *(board+4*y+x);
+                       *(board+4*y+x) = 0;
+                       int Xvalue = direction=='L'?x1+1:x1-1;
 
-                       *(board+4*x+Xvalue) = value;
-                       moved_cells[x][Xvalue] = 1;
+                       *(board+4*y+Xvalue) = value;
+                       moved_cells[y][Xvalue] = 1;
                        break;
                     }
 
-                    direction=='L'?--j: ++j;
+                    direction=='L'?--x1: ++x1;
                 }
             }
 
         }
 
-        direction=='L'? --i: ++i;
+        direction=='L'? --x: ++x;
 
      }
 
-     i = direction=='L'? 1: 2;
+     x = direction=='L'? 1: 2;
 
      while(1){
-        if(direction=='L' && i>3 || direction=='R' && i<0)
+        if(direction=='L' && x>3 || direction=='R' && x<0)
             break;
 
-        for(int x=0; x<4; ++x){
-            if(*(board+4*x+i)!=0){
-                int value = *(board+4*x+i);
-                *(board+4*x+i) = 0;
+        for(int y=0; y<4; ++y){
+            if(*(board+4*y+x)!=0){
+                int value = *(board+4*y+x);
+                *(board+4*y+x) = 0;
 
                 int xcor;
 
                 if(direction=='L'){
                     xcor = 0;
-                    while(*(board+4*x+xcor)!=0 && xcor<3){
+                    //decrease x coordinate to the maximum (move left)
+                    while(*(board+4*y+xcor)!=0 && xcor<3){
                         xcor++;
                     }
                 }
 
                 if(direction=='R'){
                     xcor = 3;
-                        while(*(board+4*x+xcor)!=0 && xcor>0){
+                    //increase x coordinate to the maximum (move left)
+                        while(*(board+4*y+xcor)!=0 && xcor>0){
                             xcor--;
                         }
                     }
 
-                *(board+4*x+xcor) = value;
+                *(board+4*y+xcor) = value;
             }
         }
-        direction=='L'?++i: --i;
+        direction=='L'?++x: --x;
      }
-     InitializeNewValue(board, 1, occupiedCells);
+     InitializeNewValue(&board, 1, &occupiedCells);
 }
+
 
 
 int main(){
     srand(time(NULL));
     int occupiedCells = 0;
-    int board[4][4] = {};
+    int board[4][4] = {
+//        {2,0,2,4},
+//        {2,0,2,4},
+//        {2,0,2,4},
+//        {2,0,2,4},
+    };
 
     InitializeNewValue(&board, 3, &occupiedCells);
 
     int GameContinues = 1;
     char move, clearBuffer;
+
+
     while(GameContinues){
         DrawBoard(&board);
 
