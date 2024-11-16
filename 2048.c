@@ -16,6 +16,27 @@ int GetNumSize(int value){
     return t;
 }
 
+int boardsAreEqual(int *board1, int *board2){
+    for(int i=0; i<4; ++i){
+        for(int x=0; x<4; ++x){
+            if(*(board1+4*i+x) != *(board2+4*i+x))
+                return 0;
+        }
+    }
+    return 1;
+}
+
+
+void copyBoards(int *board1, int *board2){
+    for(int i=0; i<4; ++i){
+        for(int x=0; x<4; ++x){
+            *(board1+4*i+x) = *(board2+4*i+x);
+        }
+    }
+}
+
+
+
 void DrawBoard(int *board){
     for(int t=0; t<4; ++t){ //how many total rows
         for(int h=0; h<SQUARESIZE/2; ++h){ //height of 1 row
@@ -62,9 +83,11 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
 }
 
 void BoardMovesVertically(int *board, int *occupiedCells, char direction){
-
     int moved_cells[4][4] = {};
     int y = direction=='U'?3:0;
+
+    int initialBoard[4][4];
+    copyBoards(initialBoard, board);
 
     while(1){ //starts at bottom row and progresses up
 
@@ -148,12 +171,17 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction){
        direction=='U'? ++y:--y;
     }
 
-    InitializeNewValue(board, 1, occupiedCells); // add new value to board
+    if(boardsAreEqual(initialBoard, board)==0)
+        InitializeNewValue(board, 1, occupiedCells); // add new value to board
 }
 
 void boardMovesHorizontally(int *board, int *occupiedCells, char direction){
     int moved_cells[4][4] = {};
     int x = direction == 'L'? 3: 0;
+
+    int initialBoard[4][4];
+    copyBoards(initialBoard, board);
+
 
     //move left or right
     while(1){
@@ -231,7 +259,9 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction){
         }
         direction=='L'?++x: --x;
      }
-     InitializeNewValue(&board, 1, &occupiedCells);
+
+     if(boardsAreEqual(initialBoard, board)==0)
+        InitializeNewValue(board, 1, occupiedCells); // add new value to board
 }
 
 
