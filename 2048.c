@@ -5,7 +5,8 @@
 #define COLOR  "\x1B[36m"
 #define COLOR_RESET  "\x1B[37m"
 
-//TODO add new variable if move changed something
+//todo fix bad input, color new value, make board better, no 0 cells, high score.
+
 
 int GetNumSize(int value){
     int t = 0;
@@ -34,6 +35,56 @@ void copyBoards(int *board1, int *board2){
         }
     }
 }
+
+int GameEnds(int *board){
+    int noMoreMoves = 0;
+
+    for(int i=0; i<4; ++i){
+        for(int x=0; x<4; ++x){
+
+            if(i==0){
+                if(*(board+4*i+x) != *(board+4*(i+1)+x))
+                    noMoreMoves++;
+            }
+
+            if(x==0){
+                if(*(board+4*i+x) != *(board+4*(i-1)+(x+1)))
+                    noMoreMoves++;
+            }
+
+            if(i>0 && i<3){
+                if(*(board+4*i+x) != *(board+4*(i-1)+x))
+                    noMoreMoves++;
+
+                if(*(board+4*i+x) != *(board+4*(i+1)+x))
+                    noMoreMoves++;
+            }
+
+            if(x>0 && x<3){
+                if(*(board+4*i+x) != *(board+4*(i-1)+(x-1)))
+                    noMoreMoves++;
+
+                if(*(board+4*i+x) != *(board+4*(i-1)+(x+1)))
+                    noMoreMoves++;
+            }
+
+            if(x==3){
+                if(*(board+4*i+x) != *(board+4*(i-1)+(x-1)))
+                    noMoreMoves++;
+            }
+
+
+            if(i==3){
+                if(*(board+4*i+x) != *(board+4*(i-1)+x))
+                    noMoreMoves++;
+            }
+        }
+    }
+    if (noMoreMoves==48) // if all possible moves for each cell don't change board
+        return 1;
+    return 0;
+}
+
 
 
 
@@ -64,7 +115,7 @@ void DrawBoard(int *board){
 }
 
 
-void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
+int InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
     int x, y;
     for(int i=0; i<NumberOfValues; ++i){
         int IsOccupied = 1;
@@ -75,10 +126,10 @@ void InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
             if(*(board+4*x+y) == 0)
                 IsOccupied = 0;
         }
-        int newCellValue[10] = {4,4,4,4,4,2,2,2,2,2};
+        int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2}; // 4 has a 10% to appear
         int newIndex = rand()%10;
         *(board+4*x+y) = newCellValue[newIndex];
-        ++occupiedCells;
+        (*occupiedCells) +=1; // doesn't work when pointer????
     }
 }
 
@@ -111,7 +162,7 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction){
                     if(*(board+4*y1+x)!=0 && *(board+4*y1+x)==*(board+4*y+x) && moved_cells[y][x]==0){
                        *(board+4*y1+x) = (*(board+4*y1+x)) * 2;
                        *(board+4*y+x) = 0;
-                       *occupiedCells--;
+                       (*occupiedCells)--;
                         moved_cells[y1][x] = 1; // make sure to not move already moved values
                         break;
                     }
@@ -199,7 +250,7 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction){
                     if(*(board+4*y+x1)!=0 && *(board+4*y+x1)==*(board+4*y+x) && moved_cells[y][x]==0){
                        *(board+4*y+x1) = (*(board+4*y+x)) * 2;
                        *(board+4*y+x) = 0;
-                       *occupiedCells--;
+                       (*occupiedCells)--;
                         moved_cells[y][x1] = 1;
                         break;
                     }
@@ -269,22 +320,32 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction){
 int main(){
     srand(time(NULL));
     int occupiedCells = 0;
-    int board[4][4] = {
-//        {2,0,2,4},
-//        {2,0,2,4},
-//        {2,0,2,4},
-//        {2,0,2,4},
-    };
+    int board[4][4] = {};
 
     InitializeNewValue(&board, 3, &occupiedCells);
 
     int GameContinues = 1;
     char move, clearBuffer;
 
-
     while(GameContinues){
-        DrawBoard(&board);
+        //DrawBoard(&board);
 
+        for(int i=0; i<4; ++i){
+            for(int x=0; x<4; ++x){
+                printf("%d ", board[i][x]);
+            }printf("\n");
+        }
+
+
+
+        if(occupiedCells==16 && GameEnds(board)){
+            printf("Game has ended");
+            GameContinues = 0;
+            break;
+        }
+
+
+        printf("Total occupied:%d\n", occupiedCells);
         printf("u - up\n");
         printf("d - down\n");
         printf("l - left\n");
@@ -295,7 +356,6 @@ int main(){
             move = toupper(move);
             if(move == 'U' || move == 'D' || move == 'R' || move == 'L'){
                 printf("Move registered!\n");
-
 
                 if(move == 'U'){
                     BoardMovesVertically(&board, &occupiedCells, move);
@@ -312,7 +372,6 @@ int main(){
                 if(move == 'R'){
                     boardMovesHorizontally(&board, &occupiedCells, move);
                 }
-
 
             }
             else{
