@@ -4,7 +4,7 @@
 #define SQUARESIZE 10 //tested with 11
 #define COLOR  "\x1B[36m"
 #define SCORECOLOR  "\x1B[33m"
-#define HIGHLIGHTCOLOR  "\x1B[31m"
+#define HIGHLIGHTCOLOR  "\x1B[32m"
 #define BADINPUTCOLOR  "\x1B[31m"
 #define COLOR_RESET  "\x1B[37m"
 
@@ -38,50 +38,35 @@ void copyBoards(int *board1, int *board2){
     }
 }
 
-int GameEnds(int *board){
-    int noMoreMoves = 0;
+//fix game doesn't end
+int GameEnds(int *board) {
+    for (int i = 0; i < 4; ++i) {
+        for (int x = 0; x < 4; ++x) {
+            int current = *(board + 4 * i + x);
 
-    for(int i=0; i<4; ++i){
-        for(int x=0; x<4; ++x){
-            if(i==0){
-                if(*(board+4*i+x) == *(board+4*(i+1)+x))
-                    return 0;
+            // Check left neighbor
+            if (x > 0 && current == *(board + 4 * i + (x - 1))) {
+                return 0; // There is a valid move
             }
 
-            if(x==0){
-                if(*(board+4*i+x) == *(board+4*(i-1)+(x+1)))
-                    return 0;
+            // Check right neighbor
+            if (x < 3 && current == *(board + 4 * i + (x + 1))) {
+                return 0; // There is a valid move
             }
 
-            if(i>0 && i<3){
-                if(*(board+4*i+x) == *(board+4*(i-1)+x))
-                    return 0;
-
-                if(*(board+4*i+x) == *(board+4*(i+1)+x))
-                    return 0;
+            // Check top neighbor
+            if (i > 0 && current == *(board + 4 * (i - 1) + x)) {
+                return 0; // There is a valid move
             }
 
-            if(x>0 && x<3){
-                if(*(board+4*i+x) == *(board+4*(i-1)+(x-1)))
-                    return 0;
-
-                if(*(board+4*i+x) == *(board+4*(i-1)+(x+1)))
-                    return 0;
-            }
-
-            if(x==3){
-                if(*(board+4*i+x) == *(board+4*(i-1)+(x-1)))
-                    return 0;
-            }
-
-
-            if(i==3){
-                if(*(board+4*i+x) == *(board+4*(i-1)+x))
-                    return 0;
+            // Check bottom neighbor
+            if (i < 3 && current == *(board + 4 * (i + 1) + x)) {
+                return 0; // There is a valid move
             }
         }
     }
 
+    // If no valid moves found
     return 1;
 }
 
@@ -156,7 +141,7 @@ int InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *
             if(*(board+4*y+x) == 0)
                 IsOccupied = 0;
         }
-        int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2}; // 4 has a 10% to appear
+        int newCellValue[10] = {6,3,3,3,3,3,3,3,3,3}; // 4 has a 10% to appear
         int newIndex = rand()%10;
         *(board+4*y+x) = newCellValue[newIndex];
         (*occupiedCells) +=1;
@@ -354,7 +339,8 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int 
 int main(){
     srand(time(NULL));
     int occupiedCells = 0;
-    int board[4][4] = {};
+    int board[4][4] = {
+    };
     int NewValueX, NewValueY; //store cell to highlight
 
     int high_score = 0;
