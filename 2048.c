@@ -1,12 +1,14 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-#define SQUARESIZE 11 //tested with 11
+#define SQUARESIZE 10 //tested with 11
 #define COLOR  "\x1B[36m"
-#define COLOR  "\x1B[36m"
+#define SCORECOLOR  "\x1B[33m"
+#define HIGHLIGHTCOLOR  "\x1B[31m"
+#define BADINPUTCOLOR  "\x1B[31m"
 #define COLOR_RESET  "\x1B[37m"
 
-//TODO clear console after move, clean up code, comment code, fullscreen maybe idk, input message, game doesn't end
+//TODO clean up code, comment code
 
 int GetNumSize(int value){
     int t = 0;
@@ -92,7 +94,7 @@ void straightLine(int length){
     }printf("-\n");
 }
 
-void drawBoard(int *board, int newValueX, int newValueY){
+void drawBoard(int *board, int newValueX, int newValueY, int high_score, int badInput){
 
     for(int j=0; j<4; ++j){
         straightLine(SQUARESIZE);
@@ -112,14 +114,25 @@ void drawBoard(int *board, int newValueX, int newValueY){
 
                     char color[] = COLOR;
                     if(j==newValueY && x==newValueX)
-                        strcpy(color,"\x1B[31m");
+                        strcpy(color,HIGHLIGHTCOLOR);
 
                     printf("|%s%*s%d%s%*s", color,leftPadding,"",*(board+4*j+x),COLOR_RESET,rightPadding,"");
                 }
                 else{
                     printf("|%*s",SQUARESIZE-1,"");
                 }
-            }printf("|\n");
+            }
+
+            if(j==0 && i==0)
+                printf("|  2048 GAME\n");
+            else if(j==0 && i==1)
+                printf("|  MADE AND DESIGNED BY AINIS AUGUSTAS LAURINAVICIUS\n");
+            else if(j==0 && i==3)
+                printf("|  %sCURRENT SCORE: %d%s\n", SCORECOLOR,high_score,COLOR_RESET);
+            else if(j==0 && i==4 && badInput)
+                printf("|  %sBAD INPUT%s\n", BADINPUTCOLOR,COLOR_RESET);
+            else
+                printf("|\n");
         }
     }
     straightLine(SQUARESIZE);
@@ -348,20 +361,20 @@ int main(){
 
     InitializeNewValue(&board, 3, &occupiedCells, &NewValueX, &NewValueY);
     NewValueX=-1, NewValueY=-1;
-    int GameContinues = 1;
     char move, clearBuffer;
 
-    while(GameContinues){
-        drawBoard(board,NewValueX,NewValueY);
+    int badInput = 0;
+
+    while(1){
+        drawBoard(board,NewValueX,NewValueY,high_score, badInput);
 
         if(occupiedCells==16 && GameEnds(board)){
             printf("Game has ended");
-            GameContinues = 0;
             break;
         }
 
 
-        printf("Current score: %d\n", high_score);
+        //printf("Current score: %d\n", high_score);
         printf("u - up\n");
         printf("d - down\n");
         printf("l - left\n");
@@ -371,6 +384,7 @@ int main(){
         if(scanf("%c", &move)==1 && getchar()=='\n'){
             move = toupper(move);
             if(move == 'U' || move == 'D' || move == 'R' || move == 'L'){
+                badInput = 0;
                 printf("Move registered!\n");
 
                 if(move == 'U'){
@@ -391,16 +405,15 @@ int main(){
 
             }
             else{
-                printf("Bad input!\n");
+                badInput = 1;
             }
         }
 
         else{
-            printf("Bad input!\n");
+            badInput = 1;
             while(clearBuffer=getchar()!='\n' && clearBuffer!=EOF);
         }
-
-        printf("\n\n");
+        system("cls");
    }
 
     return 0;
