@@ -1,11 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-#define SQUARESIZE 10
+#define SQUARESIZE 11 //tested with 11
 #define COLOR  "\x1B[36m"
 #define COLOR_RESET  "\x1B[37m"
 
-//todo fix bad input, color new value, make board better, no 0 cells, high score.
+//TODO color new value, high score.
 
 
 int GetNumSize(int value){
@@ -86,36 +86,55 @@ int GameEnds(int *board){
 }
 
 
+void straightLine(int length){
+    for(int i=0; i<4; ++i){
+        for(int x=0; x<length; ++x){
+            printf("-", x);
+        }
+    }printf("-\n");
+}
 
+void drawBoard(int *board, int newValueX, int newValueY){
 
-void DrawBoard(int *board){
-    for(int t=0; t<4; ++t){ //how many total rows
-        for(int h=0; h<SQUARESIZE/2; ++h){ //height of 1 row
-            for(int r=0; r<4; ++r){ // How many rows
-                for(int i=0; i<SQUARESIZE; ++i){ // How many collums
-                    if (h==SQUARESIZE/4 && i==0){ // Write number with correct alignment
-                        int sizeOfValue = GetNumSize(*(board+4*t+r));
-                        if(sizeOfValue<=3)
-                            printf("|%s%5d%3s%s|", COLOR, *(board+4*t+r), " ", COLOR_RESET);
-                        else if(sizeOfValue<=5)
-                            printf("|%s%6d%2s%s|", COLOR, *(board+4*t+r), " ", COLOR_RESET);
-                        else if(sizeOfValue<=7)
-                            printf("|%s%7d%1s%s|", COLOR, *(board+4*t+r), " ", COLOR_RESET);
-                        else
-                            printf("|%s%8d|%s", COLOR, *(board+4*t+r), COLOR_RESET);
+    for(int j=0; j<4; ++j){
+        straightLine(SQUARESIZE);
+        for(int i=0; i<SQUARESIZE/2; ++i){
+            for(int x=0; x<4; ++x){
+                if(i==SQUARESIZE/4 && *(board+4*j+x)!=0){
+                    int cellWidth = SQUARESIZE-1;
+                    int sizeOfNum = GetNumSize(*(board+4*j+x));
+                    int leftPadding = (cellWidth-sizeOfNum)/2;
+                    int rightPadding = cellWidth-leftPadding-sizeOfNum;
+
+                    if(cellWidth<sizeOfNum){
+                        printf("THE VALUES DO NOT FIT IN THE CELLS, PLEASE SELECT A BIGGER SIZE!!");
+                        exit(0);
                     }
-                    if(h>0 && h<SQUARESIZE/2-1 && h!=SQUARESIZE/4 && i==0)
-                        printf("|%8s|", " ");
-                    if(h==0 || h==SQUARESIZE/2-1)
-                        printf("-");
-                }printf(" ");
-            }printf("\n");
-        }printf("\n");
+
+
+                    char color[] = COLOR;
+                    if(j==newValueY && x==newValueX)
+                        strcpy(color,"\x1B[31m");
+
+                    printf("|%s%*s%d%s%*s", color,leftPadding,"",*(board+4*j+x),COLOR_RESET,rightPadding,"");
+                }
+                else{
+                    printf("|%*s",SQUARESIZE-1,"");
+                }
+            }printf("|\n");
+        }
     }
+    straightLine(SQUARESIZE);
 }
 
 
-int InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
+
+
+
+
+
+
+int InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *NewValueX, int *NewValueY){
     int x, y;
     for(int i=0; i<NumberOfValues; ++i){
         int IsOccupied = 1;
@@ -123,17 +142,19 @@ int InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells){
             x = rand()%4;
             y = rand()%4;
 
-            if(*(board+4*x+y) == 0)
+            if(*(board+4*y+x) == 0)
                 IsOccupied = 0;
         }
         int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2}; // 4 has a 10% to appear
         int newIndex = rand()%10;
-        *(board+4*x+y) = newCellValue[newIndex];
-        (*occupiedCells) +=1; // doesn't work when pointer????
+        *(board+4*y+x) = newCellValue[newIndex];
+        (*occupiedCells) +=1;
+        *NewValueX = x;
+        *NewValueY = y;
     }
 }
 
-void BoardMovesVertically(int *board, int *occupiedCells, char direction){
+void BoardMovesVertically(int *board, int *occupiedCells, char direction, int *NewValueX, int *NewValueY){
     int moved_cells[4][4] = {};
     int y = direction=='U'?3:0;
 
@@ -223,10 +244,10 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction){
     }
 
     if(boardsAreEqual(initialBoard, board)==0)
-        InitializeNewValue(board, 1, occupiedCells); // add new value to board
+        InitializeNewValue(board, 1, occupiedCells, NewValueX, NewValueY); // add new value to board
 }
 
-void boardMovesHorizontally(int *board, int *occupiedCells, char direction){
+void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int *NewValueX, int *NewValueY){
     int moved_cells[4][4] = {};
     int x = direction == 'L'? 3: 0;
 
@@ -312,7 +333,7 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction){
      }
 
      if(boardsAreEqual(initialBoard, board)==0)
-        InitializeNewValue(board, 1, occupiedCells); // add new value to board
+        InitializeNewValue(board, 1, occupiedCells, NewValueX, NewValueY); // add new value to board
 }
 
 
@@ -321,22 +342,15 @@ int main(){
     srand(time(NULL));
     int occupiedCells = 0;
     int board[4][4] = {};
+    int NewValueX, NewValueY;
 
-    InitializeNewValue(&board, 3, &occupiedCells);
-
+    InitializeNewValue(&board, 3, &occupiedCells, &NewValueX, &NewValueY);
+    NewValueX=-1, NewValueY=-1;
     int GameContinues = 1;
     char move, clearBuffer;
 
     while(GameContinues){
-        //DrawBoard(&board);
-
-        for(int i=0; i<4; ++i){
-            for(int x=0; x<4; ++x){
-                printf("%d ", board[i][x]);
-            }printf("\n");
-        }
-
-
+        drawBoard(board,NewValueX,NewValueY);
 
         if(occupiedCells==16 && GameEnds(board)){
             printf("Game has ended");
@@ -344,8 +358,6 @@ int main(){
             break;
         }
 
-
-        printf("Total occupied:%d\n", occupiedCells);
         printf("u - up\n");
         printf("d - down\n");
         printf("l - left\n");
@@ -358,25 +370,24 @@ int main(){
                 printf("Move registered!\n");
 
                 if(move == 'U'){
-                    BoardMovesVertically(&board, &occupiedCells, move);
+                    BoardMovesVertically(&board, &occupiedCells, move, &NewValueX, &NewValueY);
                 }
 
                 if(move == 'D'){
-                    BoardMovesVertically(&board, &occupiedCells, move);
+                    BoardMovesVertically(&board, &occupiedCells, move, &NewValueX, &NewValueY);
                 }
 
                 if(move == 'L'){
-                    boardMovesHorizontally(&board, &occupiedCells, move);
+                    boardMovesHorizontally(&board, &occupiedCells, move, &NewValueX, &NewValueY);
                 }
 
                 if(move == 'R'){
-                    boardMovesHorizontally(&board, &occupiedCells, move);
+                    boardMovesHorizontally(&board, &occupiedCells, move, &NewValueX, &NewValueY);
                 }
 
             }
             else{
                 printf("Bad input!\n");
-                while(clearBuffer=getchar()!='\n' && clearBuffer!=EOF);
             }
         }
 
@@ -385,7 +396,7 @@ int main(){
             while(clearBuffer=getchar()!='\n' && clearBuffer!=EOF);
         }
 
-        printf("\n");
+        printf("\n\n");
    }
 
     return 0;
