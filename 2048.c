@@ -3,10 +3,10 @@
 #include<time.h>
 #define SQUARESIZE 11 //tested with 11
 #define COLOR  "\x1B[36m"
+#define COLOR  "\x1B[36m"
 #define COLOR_RESET  "\x1B[37m"
 
-//TODO high score.
-
+//TODO clear console after move, clean up code, comment code, fullscreen maybe idk, input message, game doesn't end
 
 int GetNumSize(int value){
     int t = 0;
@@ -41,48 +41,46 @@ int GameEnds(int *board){
 
     for(int i=0; i<4; ++i){
         for(int x=0; x<4; ++x){
-
             if(i==0){
-                if(*(board+4*i+x) != *(board+4*(i+1)+x))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i+1)+x))
+                    return 0;
             }
 
             if(x==0){
-                if(*(board+4*i+x) != *(board+4*(i-1)+(x+1)))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i-1)+(x+1)))
+                    return 0;
             }
 
             if(i>0 && i<3){
-                if(*(board+4*i+x) != *(board+4*(i-1)+x))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i-1)+x))
+                    return 0;
 
-                if(*(board+4*i+x) != *(board+4*(i+1)+x))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i+1)+x))
+                    return 0;
             }
 
             if(x>0 && x<3){
-                if(*(board+4*i+x) != *(board+4*(i-1)+(x-1)))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i-1)+(x-1)))
+                    return 0;
 
-                if(*(board+4*i+x) != *(board+4*(i-1)+(x+1)))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i-1)+(x+1)))
+                    return 0;
             }
 
             if(x==3){
-                if(*(board+4*i+x) != *(board+4*(i-1)+(x-1)))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i-1)+(x-1)))
+                    return 0;
             }
 
 
             if(i==3){
-                if(*(board+4*i+x) != *(board+4*(i-1)+x))
-                    noMoreMoves++;
+                if(*(board+4*i+x) == *(board+4*(i-1)+x))
+                    return 0;
             }
         }
     }
-    if (noMoreMoves==48) // if all possible moves for each cell don't change board
-        return 1;
-    return 0;
+
+    return 1;
 }
 
 
@@ -344,7 +342,7 @@ int main(){
     srand(time(NULL));
     int occupiedCells = 0;
     int board[4][4] = {};
-    int NewValueX, NewValueY;
+    int NewValueX, NewValueY; //store cell to highlight
 
     int high_score = 0;
 
@@ -361,6 +359,7 @@ int main(){
             GameContinues = 0;
             break;
         }
+
 
         printf("Current score: %d\n", high_score);
         printf("u - up\n");
