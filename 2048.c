@@ -5,7 +5,7 @@
 #define COLOR  "\x1B[36m"
 #define COLOR_RESET  "\x1B[37m"
 
-//TODO color new value, high score.
+//TODO high score.
 
 
 int GetNumSize(int value){
@@ -154,7 +154,7 @@ int InitializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *
     }
 }
 
-void BoardMovesVertically(int *board, int *occupiedCells, char direction, int *NewValueX, int *NewValueY){
+void BoardMovesVertically(int *board, int *occupiedCells, char direction, int *NewValueX, int *NewValueY, int *high_score){
     int moved_cells[4][4] = {};
     int y = direction=='U'?3:0;
 
@@ -181,6 +181,7 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction, int *N
 
                     //if finds the same element above it
                     if(*(board+4*y1+x)!=0 && *(board+4*y1+x)==*(board+4*y+x) && moved_cells[y][x]==0){
+                       *high_score += (*(board+4*y1+x)) * 2;
                        *(board+4*y1+x) = (*(board+4*y1+x)) * 2;
                        *(board+4*y+x) = 0;
                        (*occupiedCells)--;
@@ -247,7 +248,7 @@ void BoardMovesVertically(int *board, int *occupiedCells, char direction, int *N
         InitializeNewValue(board, 1, occupiedCells, NewValueX, NewValueY); // add new value to board
 }
 
-void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int *NewValueX, int *NewValueY){
+void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int *NewValueX, int *NewValueY, int *high_score){
     int moved_cells[4][4] = {};
     int x = direction == 'L'? 3: 0;
 
@@ -269,6 +270,7 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int 
                         break;
 
                     if(*(board+4*y+x1)!=0 && *(board+4*y+x1)==*(board+4*y+x) && moved_cells[y][x]==0){
+                       *high_score += (*(board+4*y+x)) * 2;
                        *(board+4*y+x1) = (*(board+4*y+x)) * 2;
                        *(board+4*y+x) = 0;
                        (*occupiedCells)--;
@@ -344,6 +346,8 @@ int main(){
     int board[4][4] = {};
     int NewValueX, NewValueY;
 
+    int high_score = 0;
+
     InitializeNewValue(&board, 3, &occupiedCells, &NewValueX, &NewValueY);
     NewValueX=-1, NewValueY=-1;
     int GameContinues = 1;
@@ -358,6 +362,7 @@ int main(){
             break;
         }
 
+        printf("Current score: %d\n", high_score);
         printf("u - up\n");
         printf("d - down\n");
         printf("l - left\n");
@@ -370,19 +375,19 @@ int main(){
                 printf("Move registered!\n");
 
                 if(move == 'U'){
-                    BoardMovesVertically(&board, &occupiedCells, move, &NewValueX, &NewValueY);
+                    BoardMovesVertically(&board, &occupiedCells, move, &NewValueX, &NewValueY, &high_score);
                 }
 
                 if(move == 'D'){
-                    BoardMovesVertically(&board, &occupiedCells, move, &NewValueX, &NewValueY);
+                    BoardMovesVertically(&board, &occupiedCells, move, &NewValueX, &NewValueY, &high_score);
                 }
 
                 if(move == 'L'){
-                    boardMovesHorizontally(&board, &occupiedCells, move, &NewValueX, &NewValueY);
+                    boardMovesHorizontally(&board, &occupiedCells, move, &NewValueX, &NewValueY, &high_score);
                 }
 
                 if(move == 'R'){
-                    boardMovesHorizontally(&board, &occupiedCells, move, &NewValueX, &NewValueY);
+                    boardMovesHorizontally(&board, &occupiedCells, move, &NewValueX, &NewValueY, &high_score);
                 }
 
             }
