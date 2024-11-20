@@ -13,7 +13,7 @@
 #define SQUAREAMOUNT 4 //size of board 4x4 tested with 4
 
 
-//TODO clean up code, comment code
+//TODO clean up code, comment code, binary file
 
 
 //get number size to align to center when printing
@@ -25,6 +25,19 @@ int GetNumSize(int value){
     }
     return t;
 }
+
+//save progress to file
+void SaveProgress(int *board, int occupied, int high_score){
+    FILE* progressFile = fopen("Progress.dat", "wb");
+    fwrite(board, sizeof(int), SQUAREAMOUNT*SQUAREAMOUNT, progressFile);
+    fwrite(&occupied, sizeof(int), 1, progressFile);
+    fwrite(&high_score, sizeof(int), 1, progressFile);
+    fclose(progressFile);
+}
+
+
+
+
 
 //Check if no more available moves
 int GameEnds(int *board) {
@@ -326,13 +339,34 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int 
 
 int main(){
     srand(time(NULL));
-    int occupiedCells = 0;
-    int board[SQUAREAMOUNT][SQUAREAMOUNT] = {};
-    int NewValueX, NewValueY; //store cell to highlight
 
+
+    int board[SQUAREAMOUNT][SQUAREAMOUNT] = {};
+    int occupiedCells = 0;
     int high_score = 0;
 
-    InitializeNewValue(&board, 3, &occupiedCells, &NewValueX, &NewValueY);
+    int InitializeNewValues = 1;
+
+    //Read from binary file
+    FILE* progressFile = fopen("Progress.dat", "rb");
+    if (progressFile != NULL) {
+        printf("Game progress found!\n");
+        fread(&board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
+        fread(&occupiedCells, sizeof(int), 1, progressFile);
+        fread(&high_score, sizeof(int), 1, progressFile);
+        fclose(progressFile);
+        InitializeNewValues = 0;
+    }else{
+        printf("Starting a new game!\n");
+    }
+
+
+
+    int NewValueX, NewValueY; //store cell to highlight
+    if(occupiedCells<16 && InitializeNewValues)
+        InitializeNewValue(&board, 3, &occupiedCells, &NewValueX, &NewValueY);
+
+
     NewValueX=-1, NewValueY=-1;
     char move, clearBuffer;
 
@@ -343,20 +377,21 @@ int main(){
 
         if(occupiedCells==SQUAREAMOUNT*SQUAREAMOUNT && GameEnds(board)){
             printf("Game has ended");
+            SaveProgress(&board, occupiedCells, high_score);
             break;
         }
 
 
         //printf("Current score: %d\n", high_score);
         printf("u - up     e - save progress and exit\n");
-        printf("d - down\n");
+        printf("d - down   r - reset game\n");
         printf("l - left\n");
         printf("r - right\n");
         printf("Enter your move: ");
 
         if(scanf("%c", &move)==1 && getchar()=='\n'){
             move = toupper(move);
-            if(move == 'U' || move == 'D' || move == 'R' || move == 'L' || move == 'E'){
+            if(move == 'U' || move == 'D' || move == 'R' || move == 'L' || move == 'E' || move == 'R'){
                 badInput = 0;
                 printf("Move registered!\n");
 
@@ -377,8 +412,16 @@ int main(){
                 }
 
                 if(move == 'E'){
+                    SaveProgress(&board, occupiedCells, high_score);
                     break;
                 }
+
+                if(move == 'R'){
+                    memset(board, 0, sizeof(board));
+                    InitializeNewValue(&board, 3, &occupiedCells, &NewValueX, &NewValueY);
+                    NewValueX = -1; NewValueY = -1;
+                }
+
 
             }
             else{
