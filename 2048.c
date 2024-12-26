@@ -7,6 +7,7 @@
 #include<string.h> //for mem functions
 #include <windows.h> //to handle unexpected program shutdown
 #include <conio.h> // Track keyboard events
+#include <ctype.h> //for function toupper()
 
 #define SQUARESIZE 11 //tested with 11
 
@@ -396,7 +397,7 @@ void newGame(int *board, int *occupiedCells, int *currentScore, int *newValueX, 
     }
 }
 
-void updateDisplay(int board, int highScore, int currentScore, int newValueX, int newValueY, int badInput){
+void updateDisplay(int *board, int highScore, int currentScore, int newValueX, int newValueY, int badInput){
     drawBoard(board, newValueX, newValueY, currentScore, badInput, highScore);
     printf("%10s - %-1c    %15s - %-1c\n", CONTROLUP, UP, CONTROLDOWN, DOWN);
     printf("%10s - %-1c    %15s - %-1c\n", CONTROLLEFT, LEFT, CONTROLRIGHT, RIGHT);
