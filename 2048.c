@@ -21,7 +21,7 @@
 
 //PRINTF messages
 #define FOUNDPROGRESS "Game progress found!\n"
-#define NEWGAME "Starting a new game!\n"
+#define NEWGAMEMSG "Starting a new game!\n"
 #define GAMENAME "2048 GAME"
 #define AUTHOR "MADE AND DESIGNED BY AINIS AUGUSTAS LAURINAVICIUS"
 #define TEXTOVERFLOW "THE VALUES DO NOT FIT IN THE CELLS, PLEASE SELECT A BIGGER CELL SIZE!!"
@@ -393,8 +393,8 @@ void newGame(int *newValueX, int *newValueY){
     memset(board, 0, sizeof(board));
     occupiedCells = 0;
     initializeNewValue(&board, 3, &occupiedCells, newValueX, newValueY);
-    newValueX = -1;
-    newValueY = -1;
+    *newValueX = -1;
+    *newValueY = -1;
     high_score = current_score > high_score ? current_score : high_score;
     current_score = 0;
 }
@@ -424,7 +424,7 @@ int main(){
         fclose(progressFile);
         InitializeNewValues = 0;
     }else{
-        printf(NEWGAME);
+        printf(NEWGAMEMSG);
     }
 
     int newValueX, newValueY; //store cell to highlight
