@@ -156,7 +156,7 @@ void drawBoard(int *board, int newValueX, int newValueY, int current_score, int 
             else if(j == 1 && i == 0)
                 printf("|  %s%s%d%s\n", SCORECOLOR, SCOREMSG, current_score, COLOR_RESET);
             else if(j == 1 && i == 1)
-                printf("|  %s%s%d%s\n", SCORECOLOR, HIGHSCOREMSG, high_score > current_score? high_score : current_score, COLOR_RESET);
+                printf("|  %s%s%d%s\n", SCORECOLOR, HIGHSCOREMSG, high_score, COLOR_RESET);
             else if(j == 2 && i == 1 && badInput)
                 printf("|  %s%s%s\n", BADINPUTCOLOR, BADINPUTMSG, COLOR_RESET);
             else
@@ -389,7 +389,7 @@ void updateDisplay(int board, int high_score, int current_score, int newValueX, 
 }
 
 int main(){
-    int board[SQUAREAMOUNT][SQUAREAMOUNT] = { };
+    int *board = (int*)calloc(SQUAREAMOUNT * SQUAREAMOUNT, sizeof(int));
     int occupiedCells = 0;
     int current_score = 0;
     int high_score = 0;
@@ -403,7 +403,7 @@ int main(){
     FILE* progressFile = fopen(FILENAME, "rb");
     if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUAREAMOUNT * SQUAREAMOUNT + 3) {
         printf(FOUNDPROGRESS);
-        fread(&board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
+        fread(board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
         fread(&occupiedCells, sizeof(int), 1, progressFile);
         fread(&current_score, sizeof(int), 1, progressFile);
         fread(&high_score, sizeof(int), 1, progressFile);
@@ -415,7 +415,7 @@ int main(){
 
     int newValueX, newValueY; //store cell to highlight
     if(occupiedCells < SQUAREAMOUNT * SQUAREAMOUNT && InitializeNewValues)
-        initializeNewValue(&board, 3, &occupiedCells, &newValueX, &newValueY);
+        initializeNewValue(board, 3, &occupiedCells, &newValueX, &newValueY);
 
     newValueX = -1, newValueY = -1;
     char move = ' ';
@@ -423,6 +423,8 @@ int main(){
     int badInput = 0;
 
     updateDisplay(board, high_score, current_score, newValueX, newValueY, badInput);
+
+
     while (1) {
         if (occupiedCells == SQUAREAMOUNT * SQUAREAMOUNT && gameEnds(board)) {
             printf(ENDMSG);
@@ -438,19 +440,19 @@ int main(){
                 badInput = 0;
 
                 if (move == UP) { // move up
-                    boardMovesVertically(&board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
+                    boardMovesVertically(board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
                 }
 
                 if (move == DOWN) { // move down
-                    boardMovesVertically(&board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
+                    boardMovesVertically(board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
                 }
 
                 if (move == LEFT) { // move left
-                    boardMovesHorizontally(&board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
+                    boardMovesHorizontally(board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
                 }
 
                 if (move == RIGHT) { // move right
-                    boardMovesHorizontally(&board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
+                    boardMovesHorizontally(board, &occupiedCells, move, &newValueX, &newValueY, &current_score);
                 }
 
                 if (move == 'E') { // save and exit
@@ -468,6 +470,7 @@ int main(){
             }
             saveProgress(board, occupiedCells, current_score, high_score);
             system("cls"); // clears console
+            high_score = high_score > current_score? high_score : current_score;
             updateDisplay(board, high_score, current_score, newValueX, newValueY, badInput);
         }
     }
