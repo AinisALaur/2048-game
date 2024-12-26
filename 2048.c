@@ -6,6 +6,7 @@
 #include<time.h> //to get random values for board
 #include<string.h> //for mem functions
 #include <windows.h> //to handle unexpected program shutdown
+#include <conio.h> // Track keyboard events
 
 #define SQUARESIZE 11 //tested with 11
 
@@ -37,7 +38,6 @@
 #define CONTROLSAVE "SAVE GAME"
 #define CONTROLNEW "NEW GAME"
 
-
 //CONTROLS FOR THE GAME
 #define UP 'W'
 #define DOWN 'S'
@@ -46,30 +46,16 @@
 #define SAVEGAME 'E'
 #define NEWGAME 'N'
 
-//make global variables so when program shuts down unexpectedly - saves progress correctly
-int board[SQUAREAMOUNT][SQUAREAMOUNT] = { };
-int occupiedCells = 0;
-int current_score = 0;
-int high_score = 0;
-
 //save progress to file
-void saveProgress(){
+void saveProgress(int *board, int occupiedCells, int current_score, int high_score){
     FILE* progressFile = fopen(FILENAME, "wb");
     if (progressFile != NULL) {
-        fwrite(&board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
+        fwrite(board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
         fwrite(&occupiedCells, sizeof(int), 1, progressFile);
         fwrite(&current_score, sizeof(int), 1, progressFile);
         fwrite(&high_score, sizeof(int), 1, progressFile);
         fclose(progressFile);
     }
-}
-
-//handle when program shuts down unexpectedly
-BOOL WINAPI ConsoleHandler(DWORD signal) {
-    if (signal == CTRL_CLOSE_EVENT) {
-        saveProgress();
-    }
-    return TRUE;
 }
 
 long fileSize(FILE *file) {
@@ -121,7 +107,6 @@ int gameEnds(int *board) {
             }
         }
     }
-
     return 1;
 }
 
@@ -133,7 +118,6 @@ void straightLine(int length){
         }
     }printf("-\n");
 }
-
 
 //draw game board
 void drawBoard(int *board, int newValueX, int newValueY, int current_score, int badInput, int high_score){
@@ -149,12 +133,10 @@ void drawBoard(int *board, int newValueX, int newValueY, int current_score, int 
                     int leftPadding = (cellWidth - sizeOfNum) / 2;
                     int rightPadding = cellWidth - leftPadding - sizeOfNum;
 
-
                     if(cellWidth < sizeOfNum){
                         printf(TEXTOVERFLOW);
                         exit(0);
                     }
-
 
                     char color[] = COLOR;
                     if(j == newValueY && x == newValueX)
@@ -262,7 +244,7 @@ void boardMovesVertically(int *board, int *occupiedCells, char direction, int *n
     }
 
     //assign appropriate i value for upcoming loop
-    y=direction == UP? 1: SQUAREAMOUNT - 2;
+    y = direction == UP? 1: SQUAREAMOUNT - 2;
 
     //Move all elements up/down
     while(1){ // start at second row from top and progress down or second row from bottom
@@ -382,34 +364,38 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int 
                 *((int *)board + SQUAREAMOUNT * y + xcor) = value;
             }
         }
-        direction== LEFT? ++x: --x;
+        direction == LEFT? ++x: --x;
      }
 
     if(memcmp(initialBoard, board, SQUAREAMOUNT * SQUAREAMOUNT * sizeof(int))!=0)
         initializeNewValue(board, 1, occupiedCells, newValueX, newValueY); // add new value to board
+
 }
 
-void newGame(int *newValueX, int *newValueY){
-    memset(board, 0, sizeof(board));
-    occupiedCells = 0;
-    initializeNewValue(&board, 3, &occupiedCells, newValueX, newValueY);
-    *newValueX = -1;
-    *newValueY = -1;
-    high_score = current_score > high_score ? current_score : high_score;
-    current_score = 0;
+void newGame(int *board, int *occupiedCells, int *current_score, int *newValueX, int *newValueY){
+        memset(board, 0, sizeof(int) * SQUAREAMOUNT * SQUAREAMOUNT);
+        *occupiedCells = 0;
+        initializeNewValue(board, 3, occupiedCells, newValueX, newValueY);
+        *newValueX = -1;
+        *newValueY = -1;
+        *current_score = 0;
 }
 
-void updateDisplay(int newValueX, int newValueY, int badInput){
+void updateDisplay(int board, int high_score, int current_score, int newValueX, int newValueY, int badInput){
     drawBoard(board, newValueX, newValueY, current_score, badInput, high_score);
     printf("%10s - %-1c    %15s - %-1c\n", CONTROLUP, UP, CONTROLDOWN, DOWN);
     printf("%10s - %-1c    %15s - %-1c\n", CONTROLLEFT, LEFT, CONTROLRIGHT, RIGHT);
     printf("%10s - %-1c    %15s - %-1c\n", CONTROLSAVE, SAVEGAME, CONTROLNEW, NEWGAME);
 }
 
-
 int main(){
+    int board[SQUAREAMOUNT][SQUAREAMOUNT] = { };
+    int occupiedCells = 0;
+    int current_score = 0;
+    int high_score = 0;
+
     srand(time(NULL));
-    SetConsoleCtrlHandler(ConsoleHandler, TRUE); //if application is closed with "X"
+    //SetConsoleCtrlHandler(ConsoleHandler, TRUE); //if application is closed with "X"
 
     int InitializeNewValues = 1; // Check if needed to initialize initial values
 
@@ -432,23 +418,22 @@ int main(){
         initializeNewValue(&board, 3, &occupiedCells, &newValueX, &newValueY);
 
     newValueX = -1, newValueY = -1;
-    char move = ' ', clearBuffer = ' ';
+    char move = ' ';
 
     int badInput = 0;
 
-
-    updateDisplay(newValueX, newValueY, badInput);
+    updateDisplay(board, high_score, current_score, newValueX, newValueY, badInput);
     while (1) {
         if (occupiedCells == SQUAREAMOUNT * SQUAREAMOUNT && gameEnds(board)) {
             printf(ENDMSG);
             high_score = current_score > high_score ? current_score : high_score;
-            newGame(&newValueX, &newValueY);
+            newGame(board, &occupiedCells, &current_score, &newValueX, &newValueY);
+            saveProgress(board, occupiedCells, current_score, high_score);
             break;
         }
 
         if (_kbhit()) {
             move = toupper(getch());
-            printf("%c\n", move);
             if (move == UP || move == DOWN || move == RIGHT || move == LEFT || move == 'E' || move == 'N') {
                 badInput = 0;
 
@@ -469,22 +454,22 @@ int main(){
                 }
 
                 if (move == 'E') { // save and exit
-                    saveProgress();
+                    saveProgress(board, occupiedCells, current_score, high_score);
                     break;
                 }
 
                 if (move == 'N') { // new game
-                    newGame(&newValueX, &newValueY);
+                    newGame(board, &occupiedCells, &current_score, &newValueX, &newValueY);
                 }
-                system("cls"); // clears console
-                updateDisplay(newValueX, newValueY, badInput);
             } else {
                 system("cls"); // clears console
-                badInput = 1; // prints BAD INPUT if TRUE
-                updateDisplay(newValueX, newValueY, badInput);
+                badInput = 1; // prints BAD INPUT
+                updateDisplay(board, high_score, current_score, newValueX, newValueY, badInput);
             }
+            saveProgress(board, occupiedCells, current_score, high_score);
+            system("cls"); // clears console
+            updateDisplay(board, high_score, current_score, newValueX, newValueY, badInput);
         }
     }
-
     return 0;
 }
