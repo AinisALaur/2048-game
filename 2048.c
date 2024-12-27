@@ -26,11 +26,6 @@
 #define BADINPUTMSG "BAD INPUT"
 #define BADMEMORY "MEMORY ALLOCATION FAILED"
 
-#define SCOREMSG "SCORE: "
-#define HIGHSCOREMSG "HIGH SCORE: "
-#define ATTEMPTS "ATTEMPS: "
-#define BIGGESTTILE "BIGGEST TILE: "
-
 
 #define CONTROLUP "UP"
 #define CONTROLDOWN "DOWN"
@@ -130,14 +125,18 @@ void drawBoard(int *board, int newValueX, int newValueY, int currentScore, int b
                     }
                 }
 
+                Achievement *Achievements = (Achievement*)malloc(4 * sizeof(Achievement));
+                Achievements = sortByValues(attempts, highScore, currentScore, biggestTile);
+
+
                 if(j == 0 && i == 0)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, ATTEMPTS, attempts, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[0].name, Achievements[0].value, COLOR_RESET);
                 else if(j == 0 && i == 1)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, BIGGESTTILE, biggestTile, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[1].name, Achievements[1].value, COLOR_RESET);
                 else if(j == 0 && i == 2)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, SCOREMSG, currentScore, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[2].name, Achievements[2].value, COLOR_RESET);
                 else if(j == 0 && i == 3)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, HIGHSCOREMSG, highScore, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[3].name, Achievements[3].value, COLOR_RESET);
                 else if(j == 2 && i == 1 && badInput)
                     printf("|  %s%s%s\n", BADINPUTCOLOR, BADINPUTMSG, COLOR_RESET);
                 else

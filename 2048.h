@@ -5,6 +5,15 @@
 int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *attempts, int *biggestTile);
 long fileSize(FILE *file);
 void saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int attempts, int biggestTile);
+typedef struct{
+    char name[20];
+    int value;
+}Achievement;
+Achievement *sortByValues(int attempts, int highScore, int currentScore, int biggestTile);
 #define SQUAREAMOUNT 4
 #define FILENAME "Progress.dat"
+#define SCOREMSG "SCORE: "
+#define HIGHSCOREMSG "HIGH SCORE: "
+#define ATTEMPTS "ATTEMPS: "
+#define BIGGESTTILE "BIGGEST TILE: "
 #endif
