@@ -14,6 +14,7 @@ Achievement *sortByValues(int attempts, int highScore, int currentScore, int big
 #define FILENAME "Progress.dat"
 #define SCOREMSG "SCORE: "
 #define HIGHSCOREMSG "HIGH SCORE: "
-#define ATTEMPTS "ATTEMPS: "
+#define ATTEMPTS "ATTEMP: "
 #define BIGGESTTILE "BIGGEST TILE: "
+#define BADMEMORY "MEMORY ALLOCATION FAILED"
 #endif

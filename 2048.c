@@ -24,7 +24,7 @@
 #define TEXTOVERFLOW "THE VALUES DO NOT FIT IN THE CELLS, PLEASE SELECT A BIGGER CELL SIZE!!"
 #define ENDMSG "Game has ended"
 #define BADINPUTMSG "BAD INPUT"
-#define BADMEMORY "MEMORY ALLOCATION FAILED"
+#define TIMELOGMSG "Time spent playing in seconds: "
 
 
 #define CONTROLUP "UP"
@@ -41,6 +41,11 @@
 #define RIGHT 'D'
 #define SAVEGAME 'E'
 #define NEWGAME 'N'
+
+#define TIMELOGFILE "TIMES.LOG"
+
+clock_t start; // measure time
+
 
 //get number size to align to center when printing
 int getNumSize(int value){
@@ -126,8 +131,11 @@ void drawBoard(int *board, int newValueX, int newValueY, int currentScore, int b
                 }
 
                 Achievement *Achievements = (Achievement*)malloc(4 * sizeof(Achievement));
+                if(Achievements == NULL){
+                    printf(BADMEMORY);
+                    exit(0);
+                }
                 Achievements = sortByValues(attempts, highScore, currentScore, biggestTile);
-
 
                 if(j == 0 && i == 0)
                     printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[0].name, Achievements[0].value, COLOR_RESET);
@@ -141,6 +149,7 @@ void drawBoard(int *board, int newValueX, int newValueY, int currentScore, int b
                     printf("|  %s%s%s\n", BADINPUTCOLOR, BADINPUTMSG, COLOR_RESET);
                 else
                     printf("|\n");
+                free(Achievements);
             }
         }
         straightLine(SQUARESIZE);
@@ -379,6 +388,17 @@ void updateDisplay(int *board, int highScore, int currentScore, int newValueX, i
     printf("%10s - %-1c    %15s - %-1c\n", CONTROLSAVE, SAVEGAME, CONTROLNEW, NEWGAME);
 }
 
+void timeSpent() {
+    int end = clock();
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    char message[] = TIMELOGMSG;
+    FILE *file = fopen(TIMELOGFILE, "a");
+    if (file != NULL) {
+        fprintf(file, "%s%lf\n", message, time_taken);
+        fclose(file);
+    }
+}
+
 
 int main(){
     int *board = (int*)calloc(SQUAREAMOUNT * SQUAREAMOUNT, sizeof(int));
@@ -392,14 +412,14 @@ int main(){
     int highScore = 0;
     int attempts = 1;
     int biggestTile = 0;
+    start = clock();
+
+    atexit(timeSpent);
 
     srand(time(NULL));
-    //SetConsoleCtrlHandler(ConsoleHandler, TRUE); //if application is closed with "X"
 
     int initializeNewValues = 1; // Check if needed to initialize initial values
 
-    //, &attempts, &biggestTile
-    //Read from binary file
     if(readFromFile(board, &occupiedCells, &currentScore, &highScore, &initializeNewValues, &attempts, &biggestTile)){
         printf(FOUNDPROGRESS);
         ++attempts;
