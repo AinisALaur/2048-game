@@ -10,6 +10,7 @@ Achievement *sortByValues(int attempts, int highScore, int currentScore, int big
     Achievement currentScoreStruct = {SCOREMSG, currentScore};
     Achievement biggestTileStruct = {BIGGESTTILE, biggestTile};
 
+
     int size = 4;
     Achievement *Achievements = (Achievement*)malloc(size * sizeof(Achievement));
     Achievements[0] = attemptsStruct;
