@@ -16,13 +16,15 @@ long fileSize(FILE *file) {
 }
 
 
-int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues){
+int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *attempts, int *biggestTile){
     FILE* progressFile = fopen(FILENAME, "rb");
-    if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUAREAMOUNT * SQUAREAMOUNT + 3) {
+    if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUAREAMOUNT * SQUAREAMOUNT + 5) {
         fread(board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
         fread(occupiedCells, sizeof(int), 1, progressFile);
         fread(currentScore, sizeof(int), 1, progressFile);
         fread(highScore, sizeof(int), 1, progressFile);
+        fread(attempts, sizeof(int), 1, progressFile);
+        fread(biggestTile, sizeof(int), 1, progressFile);
         fclose(progressFile);
         *initializeNewValues = 0;
         return 1;
@@ -31,7 +33,7 @@ int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highSco
 }
 
 
-void saveProgress(int *board, int occupiedCells, int currentScore, int highScore){
+void saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int attempts, int biggestTile){
     if(board != NULL){
         FILE* progressFile = fopen(FILENAME, "wb");
         if (progressFile != NULL) {
@@ -39,6 +41,8 @@ void saveProgress(int *board, int occupiedCells, int currentScore, int highScore
             fwrite(&occupiedCells, sizeof(int), 1, progressFile);
             fwrite(&currentScore, sizeof(int), 1, progressFile);
             fwrite(&highScore, sizeof(int), 1, progressFile);
+            fwrite(&attempts, sizeof(int), 1, progressFile);
+            fwrite(&biggestTile, sizeof(int), 1, progressFile);
             fclose(progressFile);
         }
     }
