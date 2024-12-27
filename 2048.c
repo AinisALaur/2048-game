@@ -1,5 +1,5 @@
 //Author: Ainis Augustas Laurinavicius
-//Date: 2024/12/26
+//Date: 2024/12/27
 
 #include<stdio.h>
 #include<stdlib.h> // read and write files
@@ -8,6 +8,7 @@
 #include <windows.h> //to handle unexpected program shutdown
 #include <conio.h> // Track keyboard events
 #include <ctype.h> //for function toupper()
+#include "2048.h" //HEADER FILE
 
 #define SQUARESIZE 11 //tested with 11
 
@@ -16,10 +17,6 @@
 #define HIGHLIGHTCOLOR  "\x1B[32m" //green
 #define BADINPUTCOLOR  "\x1B[31m" //red
 #define COLOR_RESET  "\x1B[37m" //white
-
-#define SQUAREAMOUNT 4 //size of board 4x4 tested with 4
-
-#define FILENAME "Progress.dat" //name of file where to save progress
 
 //PRINTF messages
 #define FOUNDPROGRESS "Game progress found!\n"
@@ -47,32 +44,6 @@
 #define RIGHT 'D'
 #define SAVEGAME 'E'
 #define NEWGAME 'N'
-
-//save progress to file
-void saveProgress(int *board, int occupiedCells, int currentScore, int highScore){
-    if(board != NULL){
-        FILE* progressFile = fopen(FILENAME, "wb");
-        if (progressFile != NULL) {
-            fwrite(board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
-            fwrite(&occupiedCells, sizeof(int), 1, progressFile);
-            fwrite(&currentScore, sizeof(int), 1, progressFile);
-            fwrite(&highScore, sizeof(int), 1, progressFile);
-            fclose(progressFile);
-        }
-    }
-}
-
-long fileSize(FILE *file) {
-    if (!file) {
-        return 0;
-    }else{
-        long currentPos = ftell(file);
-        fseek(file, 0, SEEK_END);
-        long size = ftell(file);
-        fseek(file, currentPos, SEEK_SET);
-        return size;
-    }
-}
 
 //get number size to align to center when printing
 int getNumSize(int value){
@@ -404,6 +375,7 @@ void updateDisplay(int *board, int highScore, int currentScore, int newValueX, i
     printf("%10s - %-1c    %15s - %-1c\n", CONTROLSAVE, SAVEGAME, CONTROLNEW, NEWGAME);
 }
 
+
 int main(){
     int *board = (int*)calloc(SQUAREAMOUNT * SQUAREAMOUNT, sizeof(int));
     if(board == NULL){
@@ -418,24 +390,16 @@ int main(){
     srand(time(NULL));
     //SetConsoleCtrlHandler(ConsoleHandler, TRUE); //if application is closed with "X"
 
-    int InitializeNewValues = 1; // Check if needed to initialize initial values
+    int initializeNewValues = 1; // Check if needed to initialize initial values
 
     //Read from binary file
-    FILE* progressFile = fopen(FILENAME, "rb");
-    if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUAREAMOUNT * SQUAREAMOUNT + 3) {
+    if(readFromFile(board, &occupiedCells, &currentScore, &highScore, &initializeNewValues))
         printf(FOUNDPROGRESS);
-        fread(board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
-        fread(&occupiedCells, sizeof(int), 1, progressFile);
-        fread(&currentScore, sizeof(int), 1, progressFile);
-        fread(&highScore, sizeof(int), 1, progressFile);
-        fclose(progressFile);
-        InitializeNewValues = 0;
-    }else{
+    else
         printf(NEWGAMEMSG);
-    }
 
     int newValueX, newValueY; //store cell to highlight
-    if(occupiedCells < SQUAREAMOUNT * SQUAREAMOUNT && InitializeNewValues)
+    if(occupiedCells < SQUAREAMOUNT * SQUAREAMOUNT && initializeNewValues)
         initializeNewValue(board, 3, &occupiedCells, &newValueX, &newValueY);
 
     newValueX = -1, newValueY = -1;
