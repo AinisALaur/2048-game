@@ -420,12 +420,16 @@ int updateDisplay(int *board, int highScore, int currentScore, int newValueX, in
         return -1;
 }
 
+void GameError(){
+    printf(GAME_ERROR_MSG);
+    exit(0);
+}
+
 
 int main(){
     int *board = (int*)calloc(SQUARE_AMOUNT * SQUARE_AMOUNT, sizeof(int));
     if(board == NULL){
-        printf(GAME_ERROR_MSG);
-        exit(0);
+        GameError();
     }
 
     int occupiedCells = 0;
@@ -451,8 +455,7 @@ int main(){
     int newValueX, newValueY; //store cell to highlight
     if(occupiedCells < SQUARE_AMOUNT * SQUARE_AMOUNT && initializeNewValues){
         if(initializeNewValue(board, 3, &occupiedCells, &newValueX, &newValueY, &biggestTile) == -1){
-            printf(GAME_ERROR_MSG);
-            exit(0);
+            GameError();
         }
     }
 
@@ -462,20 +465,19 @@ int main(){
     int badInput = 0;
 
     if(updateDisplay(board, highScore, currentScore, newValueX, newValueY, badInput, biggestTile) == -1){
-        printf(GAME_ERROR_MSG);
-        exit(0);
+        GameError();
     }
-
 
     while (1) {
         if (occupiedCells == SQUARE_AMOUNT * SQUARE_AMOUNT && gameEnds(board)) {
             printf(GAME_END_MSG);
             highScore = currentScore > highScore ? currentScore : highScore;
             if(newGame(board, &occupiedCells, &currentScore, &newValueX, &newValueY, &biggestTile) == -1){
-                printf(GAME_ERROR_MSG);
-                exit(0);
+                GameError();
             }
-            saveProgress(board, occupiedCells, currentScore, highScore, biggestTile);
+            if(saveProgress(board, occupiedCells, currentScore, highScore, biggestTile) == -1){
+                GameError();
+            }
             free(board);
             break;
         }
@@ -487,29 +489,25 @@ int main(){
 
                 if (move == UP) { // move up
                     if(boardMovesVertically(board, &occupiedCells, move, &newValueX, &newValueY, &currentScore, &biggestTile) == -1){
-                        printf(GAME_ERROR_MSG);
-                        exit(0);
+                        GameError();
                     }
                 }
 
                 if (move == DOWN) { // move down
                     if(boardMovesVertically(board, &occupiedCells, move, &newValueX, &newValueY, &currentScore, &biggestTile) == -1){
-                        printf(GAME_ERROR_MSG);
-                        exit(0);
+                        GameError();
                     }
                 }
 
                 if (move == LEFT) { // move left
                     if(boardMovesHorizontally(board, &occupiedCells, move, &newValueX, &newValueY, &currentScore, &biggestTile) == -1){
-                        printf(GAME_ERROR_MSG);
-                        exit(0);
+                        GameError();
                     }
                 }
 
                 if (move == RIGHT) { // move right
                     if(boardMovesHorizontally(board, &occupiedCells, move, &newValueX, &newValueY, &currentScore, &biggestTile) == -1){
-                        printf(GAME_ERROR_MSG);
-                        exit(0);
+                        GameError();
                     }
                 }
 
@@ -521,26 +519,22 @@ int main(){
 
                 if (move == START_NEW_GAME) { // new game
                     if(newGame(board, &occupiedCells, &currentScore, &newValueX, &newValueY, &biggestTile) == -1){
-                        printf(GAME_ERROR_MSG);
-                        exit(0);
+                        GameError();
                     }
                 }
             } else {
                 system("cls"); // clears console
                 badInput = 1; // prints BAD INPUT
                 if(updateDisplay(board, highScore, currentScore, newValueX, newValueY, badInput, biggestTile) == -1){
-                        printf(GAME_ERROR_MSG);
-                        exit(0);
+                    GameError();
                 }
             }
             saveProgress(board, occupiedCells, currentScore, highScore, biggestTile); //save progress in case user shuts down program unexpectedly
             system("cls"); // clears console
             highScore = highScore > currentScore? highScore : currentScore; //keep track of high score
             if (updateDisplay(board, highScore, currentScore, newValueX, newValueY, badInput, biggestTile) == -1){
-                printf(GAME_ERROR_MSG);
-                exit(0);
+                GameError();
             } // update information shown on screen
-            printf("Occupied: %d\n", occupiedCells);
         }
     }
     return 0;

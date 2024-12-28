@@ -5,7 +5,7 @@
 #include<time.h>
 int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *biggestTile);
 long fileSize(FILE *file);
-void saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile);
+int saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile);
 typedef struct{
     char name[30];
     int value;
@@ -21,7 +21,7 @@ void timeSpent();
 //printf messages
 #define SCORE_MSG "SCORE: "
 #define HIGH_SCORE_MSG "HIGH SCORE: "
-#define ATTEMPTS "ATTEMP: "
+#define ATTEMPTS "ATTEMPT: "
 #define BIGGEST_TILE "ALL TIME BIGGEST TILE: "
 #define BAD_MEMORY "MEMORY ALLOCATION FAILED"
 #define TIME_LOG_MSG "On attempt %d total time playing in seconds: %.3lf\n"

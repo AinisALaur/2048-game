@@ -6,7 +6,7 @@
 
 long fileSize(FILE *file) {
     if (!file) {
-        return 0;
+        return -1;
     }else{
         long currentPos = ftell(file);
         fseek(file, 0, SEEK_END);
@@ -18,23 +18,28 @@ long fileSize(FILE *file) {
 
 
 int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *biggestTile){
-    FILE* progressFile = fopen(FILE_NAME, "rb");
-    if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUARE_AMOUNT * SQUARE_AMOUNT + 5) {
-        fread(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
-        fread(occupiedCells, sizeof(int), 1, progressFile);
-        fread(currentScore, sizeof(int), 1, progressFile);
-        fread(highScore, sizeof(int), 1, progressFile);
-        fread(&attempts, sizeof(int), 1, progressFile);
-        fread(biggestTile, sizeof(int), 1, progressFile);
-        fclose(progressFile);
-        *initializeNewValues = 0;
-        return 1;
+    if(board != NULL && occupiedCells != NULL && currentScore != NULL && highScore != NULL && initializeNewValues != NULL && biggestTile != NULL){
+        FILE* progressFile = fopen(FILE_NAME, "rb");
+        if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUARE_AMOUNT * SQUARE_AMOUNT + 5) {
+            fread(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
+            fread(occupiedCells, sizeof(int), 1, progressFile);
+            fread(currentScore, sizeof(int), 1, progressFile);
+            fread(highScore, sizeof(int), 1, progressFile);
+            fread(&attempts, sizeof(int), 1, progressFile);
+            fread(biggestTile, sizeof(int), 1, progressFile);
+            fclose(progressFile);
+            *initializeNewValues = 0;
+            return 1;
+        }
+        else
+            return -1;
     }
-    return 0;
+    else
+        return -1;
 }
 
 
-void saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile){
+int saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile){
     if(board != NULL){
         FILE* progressFile = fopen(FILE_NAME, "wb");
         if (progressFile != NULL) {
@@ -45,8 +50,12 @@ void saveProgress(int *board, int occupiedCells, int currentScore, int highScore
             fwrite(&attempts, sizeof(int), 1, progressFile);
             fwrite(&biggestTile, sizeof(int), 1, progressFile);
             fclose(progressFile);
+            return 1;
         }
+        else
+            return -1;
     }
+    return -1;
 }
 
 void timeSpent() {
