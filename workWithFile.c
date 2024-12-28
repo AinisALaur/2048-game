@@ -17,14 +17,14 @@ long fileSize(FILE *file) {
 }
 
 
-int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *attempts, int *biggestTile){
+int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *biggestTile){
     FILE* progressFile = fopen(FILE_NAME, "rb");
     if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUARE_AMOUNT * SQUARE_AMOUNT + 5) {
         fread(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
         fread(occupiedCells, sizeof(int), 1, progressFile);
         fread(currentScore, sizeof(int), 1, progressFile);
         fread(highScore, sizeof(int), 1, progressFile);
-        fread(attempts, sizeof(int), 1, progressFile);
+        fread(&attempts, sizeof(int), 1, progressFile);
         fread(biggestTile, sizeof(int), 1, progressFile);
         fclose(progressFile);
         *initializeNewValues = 0;
@@ -34,7 +34,7 @@ int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highSco
 }
 
 
-void saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int attempts, int biggestTile){
+void saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile){
     if(board != NULL){
         FILE* progressFile = fopen(FILE_NAME, "wb");
         if (progressFile != NULL) {
@@ -55,7 +55,7 @@ void timeSpent() {
     char message[] = TIME_LOG_MSG;
     FILE *file = fopen(TIME_LOG_FILE, "a");
     if (file != NULL) {
-        fprintf(file, "%s%lf\n", message, time_taken);
+        fprintf(file, TIME_LOG_MSG, attempts, time_taken);
         fclose(file);
     }
 }
