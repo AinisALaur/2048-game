@@ -10,41 +10,37 @@
 #include <ctype.h> //for function toupper()
 #include "2048.h" //HEADER FILE
 
-#define SQUARESIZE 11 //tested with 11
 
-#define COLOR  "\x1B[36m" //cyan
-#define SCORECOLOR  "\x1B[33m" //yellow
-#define HIGHLIGHTCOLOR  "\x1B[32m" //green
-#define BADINPUTCOLOR  "\x1B[31m" //red
+//Basic settings
+#define SQUARE_SIZE 11 //tested with 11
+#define VALUE_COLOR  "\x1B[36m" //cyan
+#define ACHIEVEMENT_COLOR  "\x1B[33m" //yellow
+#define HIGHLIGHT_COLOR  "\x1B[32m" //green
+#define BAD_INPUT_COLOR  "\x1B[31m" //red
 #define COLOR_RESET  "\x1B[37m" //white
 
 //PRINTF messages
-#define FOUNDPROGRESS "Game progress found!\n"
-#define NEWGAMEMSG "Starting a new game!\n"
-#define TEXTOVERFLOW "THE VALUES DO NOT FIT IN THE CELLS, PLEASE SELECT A BIGGER CELL SIZE!!"
-#define ENDMSG "Game has ended"
-#define BADINPUTMSG "BAD INPUT"
-#define TIMELOGMSG "Time spent playing in seconds: "
+#define FOUND_PROGRESS_MSG "Game progress found!\n"
+#define NEW_GAME_MSG "Starting a new game!\n"
+#define TEXT_OVERFLOW_MSG "THE VALUES DO NOT FIT IN THE CELLS, PLEASE SELECT A BIGGER CELL SIZE!!"
+#define GAME_END_MSG "Game has ended"
+#define BAD_INPUT_MSG "BAD INPUT"
+#define CONTROL_UP_MSG "UP"
+#define CONTROL_DOWN_MSG "DOWN"
+#define CONTROL_LEFT_MSG "LEFT"
+#define CONTROL_RIGHT_MSG "RIGHT"
+#define CONTROL_SAVE_GAME_MSG "SAVE GAME"
+#define CONTROL_NEW_GAME_MSG "NEW GAME"
 
-
-#define CONTROLUP "UP"
-#define CONTROLDOWN "DOWN"
-#define CONTROLLEFT "LEFT"
-#define CONTROLRIGHT "RIGHT"
-#define CONTROLSAVE "SAVE GAME"
-#define CONTROLNEW "NEW GAME"
-
-//CONTROLS FOR THE GAME
+//Controls for the game
 #define UP 'W'
 #define DOWN 'S'
 #define LEFT 'A'
 #define RIGHT 'D'
-#define SAVEGAME 'E'
-#define NEWGAME 'N'
+#define SAVE_GAME 'E'
+#define START_NEW_GAME 'N'
 
-#define TIMELOGFILE "TIMES.LOG"
-
-clock_t start; // measure time
+clock_t start;
 
 
 //get number size to align to center when printing
@@ -60,27 +56,27 @@ int getNumSize(int value){
 //Check if no more available moves
 int gameEnds(int *board) {
     if(board != NULL){
-        for (int i = 0; i < SQUAREAMOUNT; ++i) {
-            for (int x = 0; x < SQUAREAMOUNT; ++x) {
-                int current = *(board + SQUAREAMOUNT * i + x);
+        for (int i = 0; i < SQUARE_AMOUNT; ++i) {
+            for (int x = 0; x < SQUARE_AMOUNT; ++x) {
+                int current = *(board + SQUARE_AMOUNT * i + x);
 
                 // Check left neighbor
-                if (x > 0 && current == *(board + SQUAREAMOUNT * i + (x - 1))) {
+                if (x > 0 && current == *(board + SQUARE_AMOUNT * i + (x - 1))) {
                     return 0;
                 }
 
                 // Check right neighbor
-                if (x < SQUAREAMOUNT-1 && current == *(board + SQUAREAMOUNT * i + (x + 1))) {
+                if (x < SQUARE_AMOUNT-1 && current == *(board + SQUARE_AMOUNT * i + (x + 1))) {
                     return 0;
                 }
 
                 // Check top neighbor
-                if (i > 0 && current == *(board + SQUAREAMOUNT * (i - 1) + x)) {
+                if (i > 0 && current == *(board + SQUARE_AMOUNT * (i - 1) + x)) {
                     return 0;
                 }
 
                 // Check bottom neighbor
-                if (i < SQUAREAMOUNT-1 && current == *(board + SQUAREAMOUNT * (i + 1) + x)) {
+                if (i < SQUARE_AMOUNT-1 && current == *(board + SQUARE_AMOUNT * (i + 1) + x)) {
                     return 0;
                 }
             }
@@ -92,7 +88,7 @@ int gameEnds(int *board) {
 
 // print a straight horizontal line for board visualization
 void straightLine(int length){
-    for(int i =0; i < SQUAREAMOUNT; ++i){
+    for(int i =0; i < SQUARE_AMOUNT; ++i){
         for(int x=0; x < length; ++x){
             printf("-", x);
         }
@@ -102,57 +98,57 @@ void straightLine(int length){
 //draw game board
 void drawBoard(int *board, int newValueX, int newValueY, int currentScore, int badInput, int highScore, int attempts, int biggestTile){
     if(board != NULL){
-        for(int j = 0; j < SQUAREAMOUNT; ++j){
-            straightLine(SQUARESIZE);
-            for(int i = 0; i < SQUARESIZE/2; ++i){
-                for(int x = 0; x < SQUAREAMOUNT; ++x){
-                    if(i == SQUARESIZE / 4 && *(board + SQUAREAMOUNT * j + x) != 0){
+        for(int j = 0; j < SQUARE_AMOUNT; ++j){
+            straightLine(SQUARE_SIZE);
+            for(int i = 0; i < SQUARE_SIZE/2; ++i){
+                for(int x = 0; x < SQUARE_AMOUNT; ++x){
+                    if(i == SQUARE_SIZE / 4 && *(board + SQUARE_AMOUNT * j + x) != 0){
 
                         //calculate padding to align number to center
-                        int cellWidth = SQUARESIZE - 1;
-                        int sizeOfNum = getNumSize(*(board + SQUAREAMOUNT * j + x));
+                        int cellWidth = SQUARE_SIZE - 1;
+                        int sizeOfNum = getNumSize(*(board + SQUARE_AMOUNT * j + x));
                         int leftPadding = (cellWidth - sizeOfNum) / 2;
                         int rightPadding = cellWidth - leftPadding - sizeOfNum;
 
                         if(cellWidth < sizeOfNum){
-                            printf(TEXTOVERFLOW);
+                            printf(TEXT_OVERFLOW_MSG);
                             exit(0);
                         }
 
-                        char color[] = COLOR;
+                        char cellValueColor[] = VALUE_COLOR;
                         if(j == newValueY && x == newValueX)
-                            strcpy(color,HIGHLIGHTCOLOR);
+                            strcpy(cellValueColor,HIGHLIGHT_COLOR);
 
-                        printf("|%s%*s%d%s%*s", color,leftPadding,"",*(board + SQUAREAMOUNT * j + x),COLOR_RESET,rightPadding,"");
+                        printf("|%s%*s%d%s%*s", cellValueColor, leftPadding,"",*(board + SQUARE_AMOUNT * j + x),COLOR_RESET,rightPadding,"");
                     }
                     else{
-                        printf("|%*s",SQUARESIZE - 1,"");
+                        printf("|%*s",SQUARE_SIZE - 1,"");
                     }
                 }
 
                 Achievement *Achievements = (Achievement*)malloc(4 * sizeof(Achievement));
                 if(Achievements == NULL){
-                    printf(BADMEMORY);
+                    printf(BAD_MEMORY);
                     exit(0);
                 }
                 Achievements = sortByValues(attempts, highScore, currentScore, biggestTile);
 
                 if(j == 0 && i == 0)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[0].name, Achievements[0].value, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[0].name, Achievements[0].value, COLOR_RESET);
                 else if(j == 0 && i == 1)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[1].name, Achievements[1].value, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[1].name, Achievements[1].value, COLOR_RESET);
                 else if(j == 0 && i == 2)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[2].name, Achievements[2].value, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[2].name, Achievements[2].value, COLOR_RESET);
                 else if(j == 0 && i == 3)
-                    printf("|  %s%s%d%s\n", SCORECOLOR, Achievements[3].name, Achievements[3].value, COLOR_RESET);
+                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[3].name, Achievements[3].value, COLOR_RESET);
                 else if(j == 2 && i == 1 && badInput)
-                    printf("|  %s%s%s\n", BADINPUTCOLOR, BADINPUTMSG, COLOR_RESET);
+                    printf("|  %s%s%s\n", BAD_INPUT_COLOR, BAD_INPUT_MSG, COLOR_RESET);
                 else
                     printf("|\n");
                 free(Achievements);
             }
         }
-        straightLine(SQUARESIZE);
+        straightLine(SQUARE_SIZE);
     }
 }
 
@@ -163,15 +159,15 @@ int initializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *
         for(int i = 0; i < NumberOfValues; ++i){
             int IsOccupied = 1;
             while(IsOccupied){
-                x = rand() % SQUAREAMOUNT;
-                y = rand() % SQUAREAMOUNT;
+                x = rand() % SQUARE_AMOUNT;
+                y = rand() % SQUARE_AMOUNT;
 
-                if(*(board + SQUAREAMOUNT * y + x) == 0)
+                if(*(board + SQUARE_AMOUNT * y + x) == 0)
                     IsOccupied = 0;
             }
             int newCellValue[10] = {4,2,2,2,2,2,2,2,2,2}; // 4 has a 10% to appear
             int newIndex = rand() % 10;
-            *(board + SQUAREAMOUNT * y + x) = newCellValue[newIndex];
+            *(board + SQUARE_AMOUNT * y + x) = newCellValue[newIndex];
             *biggestTile = (*biggestTile) > newCellValue[newIndex]? *biggestTile: newCellValue[newIndex];
             (*occupiedCells) += 1;
             *newValueX = x;
@@ -182,48 +178,48 @@ int initializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *
 
 void boardMovesVertically(int *board, int *occupiedCells, char direction, int *newValueX, int *newValueY, int *currentScore, int *biggestTile){
     if(board != NULL && occupiedCells!= NULL && newValueX != NULL && newValueY != NULL && currentScore != NULL){
-        int moved_cells[SQUAREAMOUNT][SQUAREAMOUNT] = {};
-        int y = direction == UP? SQUAREAMOUNT-1: 0;
+        int moved_cells[SQUARE_AMOUNT][SQUARE_AMOUNT] = {};
+        int y = direction == UP? SQUARE_AMOUNT-1: 0;
 
-        int initialBoard[SQUAREAMOUNT][SQUAREAMOUNT] = {};
-        memcpy(initialBoard, board, SQUAREAMOUNT * SQUAREAMOUNT *sizeof(int));
+        int initialBoard[SQUARE_AMOUNT][SQUARE_AMOUNT] = {};
+        memcpy(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT *sizeof(int));
 
         while(1){ //starts at bottom row and progresses up
 
             //check when to stop cycle
-            if(direction == UP && y <= 0 || direction == DOWN && y >= SQUAREAMOUNT - 1){
+            if(direction == UP && y <= 0 || direction == DOWN && y >= SQUARE_AMOUNT - 1){
                 break;
             }
 
-            for(int x = 0; x < SQUAREAMOUNT; ++x){ //goes trough row's elements
-                if(*(board + SQUAREAMOUNT * y + x) !=0 ){ // if element is not 0 we look if any non 0 elements exist above/below
+            for(int x = 0; x < SQUARE_AMOUNT; ++x){ //goes trough row's elements
+                if(*(board + SQUARE_AMOUNT * y + x) !=0 ){ // if element is not 0 we look if any non 0 elements exist above/below
 
                     //assign j accordingly
                     int  y1 = direction == UP? y - 1: y + 1;
 
                     while(1){ // loop that checks all elements above/below
-                        if(direction == UP && y1 < 0 || direction == DOWN && y1 > SQUAREAMOUNT - 1){
+                        if(direction == UP && y1 < 0 || direction == DOWN && y1 > SQUARE_AMOUNT - 1){
                             break;
                         }
 
                         //if finds the same element above it
-                        if(*(board + SQUAREAMOUNT * y1 + x) != 0 && *(board + SQUAREAMOUNT * y1 + x) == *(board + SQUAREAMOUNT * y + x) && moved_cells[y][x] == 0){
-                           *currentScore += (*(board + SQUAREAMOUNT * y1 + x)) * 2;
-                           *(board+SQUAREAMOUNT* y1 + x) = (*(board + SQUAREAMOUNT * y1 + x)) * 2;
-                           *(board+SQUAREAMOUNT* y + x) = 0;
-                           *biggestTile = (*biggestTile) > *(board+SQUAREAMOUNT* y1 + x)? *biggestTile: *(board+SQUAREAMOUNT* y1 + x);
+                        if(*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) == *(board + SQUARE_AMOUNT * y + x) && moved_cells[y][x] == 0){
+                           *currentScore += (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
+                           *(board+SQUARE_AMOUNT* y1 + x) = (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
+                           *(board+SQUARE_AMOUNT* y + x) = 0;
+                           *biggestTile = (*biggestTile) > *(board+SQUARE_AMOUNT* y1 + x)? *biggestTile: *(board+SQUARE_AMOUNT* y1 + x);
                            (*occupiedCells)--;
                             moved_cells[y1][x] = 1; // make sure to not move already moved values
                             break;
                         }
 
                         //if finds a non 0 element that is not equal to original
-                        else if(*(board + SQUAREAMOUNT * y1 + x) != 0 && *(board + SQUAREAMOUNT * y1 + x) != *(board + SQUAREAMOUNT * y + x) && moved_cells[y][x] == 0){
-                           int new_value = *(board + SQUAREAMOUNT * y + x);
-                           *(board + SQUAREAMOUNT * y + x) = 0;
+                        else if(*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) != *(board + SQUARE_AMOUNT * y + x) && moved_cells[y][x] == 0){
+                           int new_value = *(board + SQUARE_AMOUNT * y + x);
+                           *(board + SQUARE_AMOUNT * y + x) = 0;
                            int Yvalue = direction == UP? y1 + 1: y1 - 1;
 
-                           *(board+SQUAREAMOUNT*Yvalue+x) = new_value;
+                           *(board+SQUARE_AMOUNT*Yvalue+x) = new_value;
                            moved_cells[Yvalue][x] = 1; // make sure to not move already moved values
                            break;
                         }
@@ -239,83 +235,83 @@ void boardMovesVertically(int *board, int *occupiedCells, char direction, int *n
         }
 
         //assign appropriate i value for upcoming loop
-        y = direction == UP? 1: SQUAREAMOUNT - 2;
+        y = direction == UP? 1: SQUARE_AMOUNT - 2;
 
         //Move all elements up/down
         while(1){ // start at second row from top and progress down or second row from bottom
 
             //break function when needed
-            if(direction == UP && y > SQUAREAMOUNT - 1 || direction == DOWN && y < 0){
+            if(direction == UP && y > SQUARE_AMOUNT - 1 || direction == DOWN && y < 0){
                 break;
             }
 
-            for(int x = 0; x < SQUAREAMOUNT; ++x){ // go through all row's elements
-                int cellValue = *(board + SQUAREAMOUNT * y + x);
+            for(int x = 0; x < SQUARE_AMOUNT; ++x){ // go through all row's elements
+                int cellValue = *(board + SQUARE_AMOUNT * y + x);
                 if(cellValue != 0){ // if element is not zero move it as high/low up as possible
-                    *(board + SQUAREAMOUNT * y + x) = 0;
+                    *(board + SQUARE_AMOUNT * y + x) = 0;
                     int ValuesYcord;
                     if(direction == UP){
                         ValuesYcord = 0;
-                        while(*(board + SQUAREAMOUNT * ValuesYcord + x) != 0) // increasing it's y coordinate to the maximum
+                        while(*(board + SQUARE_AMOUNT * ValuesYcord + x) != 0) // increasing it's y coordinate to the maximum
                             ValuesYcord++;
                     }
                     else{
-                        ValuesYcord = SQUAREAMOUNT - 1;
-                        while(*(board + SQUAREAMOUNT * ValuesYcord + x) != 0) // decreasing it's y coordinate to the maximum
+                        ValuesYcord = SQUARE_AMOUNT - 1;
+                        while(*(board + SQUARE_AMOUNT * ValuesYcord + x) != 0) // decreasing it's y coordinate to the maximum
                             ValuesYcord--;
                     }
 
-                    *(board + SQUAREAMOUNT * ValuesYcord + x) = cellValue;
+                    *(board + SQUARE_AMOUNT * ValuesYcord + x) = cellValue;
                 }
             }
            // move up a row or down
            direction == UP? ++y: --y;
         }
 
-        if(memcmp(initialBoard, board, SQUAREAMOUNT * SQUAREAMOUNT * sizeof(int)) != 0)
+        if(memcmp(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int)) != 0)
             initializeNewValue(board, 1, occupiedCells, newValueX, newValueY, biggestTile); // add new value to board
     }
 }
 
 void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int *newValueX, int *newValueY, int *currentScore, int *biggestTile){
     if(board != NULL && occupiedCells!= NULL && newValueX != NULL && newValueY != NULL && currentScore != NULL){
-        int moved_cells[SQUAREAMOUNT][SQUAREAMOUNT] = {};
-        int x = direction == LEFT? SQUAREAMOUNT-1: 0;
+        int moved_cells[SQUARE_AMOUNT][SQUARE_AMOUNT] = {};
+        int x = direction == LEFT? SQUARE_AMOUNT-1: 0;
 
-        int initialBoard[SQUAREAMOUNT][SQUAREAMOUNT] = {};
-        memcpy(initialBoard, board, SQUAREAMOUNT * SQUAREAMOUNT * sizeof(int));
+        int initialBoard[SQUARE_AMOUNT][SQUARE_AMOUNT] = {};
+        memcpy(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int));
 
 
         //move left or right
         while(1){
 
-            if(direction == LEFT && x < 1 || direction == RIGHT && x > SQUAREAMOUNT - 1)
+            if(direction == LEFT && x < 1 || direction == RIGHT && x > SQUARE_AMOUNT - 1)
                 break;
 
-            for(int y = 0; y < SQUAREAMOUNT; ++y){
-                if(*(board + SQUAREAMOUNT * y + x) != 0){
+            for(int y = 0; y < SQUARE_AMOUNT; ++y){
+                if(*(board + SQUARE_AMOUNT * y + x) != 0){
                     int x1 = direction == LEFT? x - 1: x + 1;
                     while(1){
-                        if(direction == LEFT && x1 < 0 || direction == RIGHT && x1 > SQUAREAMOUNT - 1)
+                        if(direction == LEFT && x1 < 0 || direction == RIGHT && x1 > SQUARE_AMOUNT - 1)
                             break;
 
-                        if(*((int *)board + SQUAREAMOUNT * y + x1) != 0 && *(board + SQUAREAMOUNT * y + x1) == *(board + SQUAREAMOUNT * y + x) && moved_cells[y][x] == 0){
-                           *currentScore += (*(board + SQUAREAMOUNT * y + x)) * 2;
-                           *(board + SQUAREAMOUNT * y + x1) = (*(board + SQUAREAMOUNT * y + x)) * 2;
-                           *biggestTile = (*biggestTile) > *(board + SQUAREAMOUNT * y + x1)? *biggestTile: *(board + SQUAREAMOUNT * y + x1);
-                           *(board + SQUAREAMOUNT * y + x) = 0;
+                        if(*((int *)board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) == *(board + SQUARE_AMOUNT * y + x) && moved_cells[y][x] == 0){
+                           *currentScore += (*(board + SQUARE_AMOUNT * y + x)) * 2;
+                           *(board + SQUARE_AMOUNT * y + x1) = (*(board + SQUARE_AMOUNT * y + x)) * 2;
+                           *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y + x1)? *biggestTile: *(board + SQUARE_AMOUNT * y + x1);
+                           *(board + SQUARE_AMOUNT * y + x) = 0;
                            (*occupiedCells)--;
                             moved_cells[y][x1] = 1;
                             break;
                         }
 
 
-                        if(*(board + SQUAREAMOUNT * y + x1) != 0 && *(board + SQUAREAMOUNT * y + x1)!=*(board + SQUAREAMOUNT * y + x) && moved_cells[y][x] == 0){
+                        if(*(board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1)!=*(board + SQUARE_AMOUNT * y + x) && moved_cells[y][x] == 0){
                            int value = *(board + 4 * y + x);
-                           *(board + SQUAREAMOUNT * y + x) = 0;
+                           *(board + SQUARE_AMOUNT * y + x) = 0;
                            int Xvalue = direction == LEFT? x1 + 1: x1 - 1;
 
-                           *(board + SQUAREAMOUNT * y + Xvalue) = value;
+                           *(board + SQUARE_AMOUNT * y + Xvalue) = value;
                            moved_cells[y][Xvalue] = 1;
                            break;
                         }
@@ -330,49 +326,49 @@ void boardMovesHorizontally(int *board, int *occupiedCells, char direction, int 
 
          }
 
-         x = direction == LEFT? 1: SQUAREAMOUNT - 2;
+         x = direction == LEFT? 1: SQUARE_AMOUNT - 2;
 
          while(1){
-            if(direction == LEFT && x > SQUAREAMOUNT - 1 || direction == RIGHT && x < 0)
+            if(direction == LEFT && x > SQUARE_AMOUNT - 1 || direction == RIGHT && x < 0)
                 break;
 
-            for(int y = 0; y < SQUAREAMOUNT; ++y){
-                if(*(board + SQUAREAMOUNT * y + x) != 0){
-                    int value = *(board + SQUAREAMOUNT * y + x);
-                    *(board + SQUAREAMOUNT * y + x) = 0;
+            for(int y = 0; y < SQUARE_AMOUNT; ++y){
+                if(*(board + SQUARE_AMOUNT * y + x) != 0){
+                    int value = *(board + SQUARE_AMOUNT * y + x);
+                    *(board + SQUARE_AMOUNT * y + x) = 0;
 
                     int xcor;
 
                     if(direction == LEFT){
                         xcor = 0;
                         //decrease x coordinate to the maximum (move left)
-                        while(*(board + SQUAREAMOUNT * y + xcor) != 0 && xcor < SQUAREAMOUNT - 1){
+                        while(*(board + SQUARE_AMOUNT * y + xcor) != 0 && xcor < SQUARE_AMOUNT - 1){
                             xcor++;
                         }
                     }
 
                     if(direction == RIGHT){
-                        xcor = SQUAREAMOUNT - 1;
+                        xcor = SQUARE_AMOUNT - 1;
                         //increase x coordinate to the maximum (move left)
-                            while(*(board + SQUAREAMOUNT * y + xcor) != 0 && xcor > 0){
+                            while(*(board + SQUARE_AMOUNT * y + xcor) != 0 && xcor > 0){
                                 xcor--;
                             }
                         }
 
-                    *((int *)board + SQUAREAMOUNT * y + xcor) = value;
+                    *((int *)board + SQUARE_AMOUNT * y + xcor) = value;
                 }
             }
             direction == LEFT? ++x: --x;
          }
 
-        if(memcmp(initialBoard, board, SQUAREAMOUNT * SQUAREAMOUNT * sizeof(int))!=0)
+        if(memcmp(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int))!=0)
             initializeNewValue(board, 1, occupiedCells, newValueX, newValueY, biggestTile); // add new value to board
     }
 }
 
 void newGame(int *board, int *occupiedCells, int *currentScore, int *newValueX, int *newValueY, int *biggestTile){
     if(board != NULL && occupiedCells!= NULL && newValueX != NULL && newValueY != NULL && currentScore != NULL){
-        memset(board, 0, sizeof(int) * SQUAREAMOUNT * SQUAREAMOUNT);
+        memset(board, 0, sizeof(int) * SQUARE_AMOUNT * SQUARE_AMOUNT);
         *occupiedCells = 0;
         initializeNewValue(board, 3, occupiedCells, newValueX, newValueY, biggestTile);
         *newValueX = -1;
@@ -383,27 +379,16 @@ void newGame(int *board, int *occupiedCells, int *currentScore, int *newValueX, 
 
 void updateDisplay(int *board, int highScore, int currentScore, int newValueX, int newValueY, int badInput, int attempts, int biggestTile){
     drawBoard(board, newValueX, newValueY, currentScore, badInput, highScore, attempts, biggestTile);
-    printf("%10s - %-1c    %15s - %-1c\n", CONTROLUP, UP, CONTROLDOWN, DOWN);
-    printf("%10s - %-1c    %15s - %-1c\n", CONTROLLEFT, LEFT, CONTROLRIGHT, RIGHT);
-    printf("%10s - %-1c    %15s - %-1c\n", CONTROLSAVE, SAVEGAME, CONTROLNEW, NEWGAME);
-}
-
-void timeSpent() {
-    int end = clock();
-    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-    char message[] = TIMELOGMSG;
-    FILE *file = fopen(TIMELOGFILE, "a");
-    if (file != NULL) {
-        fprintf(file, "%s%lf\n", message, time_taken);
-        fclose(file);
-    }
+    printf("%10s - %-1c    %15s - %-1c\n", CONTROL_UP_MSG, UP, CONTROL_DOWN_MSG, DOWN);
+    printf("%10s - %-1c    %15s - %-1c\n", CONTROL_LEFT_MSG, LEFT, CONTROL_RIGHT_MSG, RIGHT);
+    printf("%10s - %-1c    %15s - %-1c\n", CONTROL_SAVE_GAME_MSG, SAVE_GAME, CONTROL_NEW_GAME_MSG, START_NEW_GAME);
 }
 
 
 int main(){
-    int *board = (int*)calloc(SQUAREAMOUNT * SQUAREAMOUNT, sizeof(int));
+    int *board = (int*)calloc(SQUARE_AMOUNT * SQUARE_AMOUNT, sizeof(int));
     if(board == NULL){
-        printf(BADMEMORY);
+        printf(BAD_MEMORY);
         exit(0);
     }
 
@@ -421,14 +406,14 @@ int main(){
     int initializeNewValues = 1; // Check if needed to initialize initial values
 
     if(readFromFile(board, &occupiedCells, &currentScore, &highScore, &initializeNewValues, &attempts, &biggestTile)){
-        printf(FOUNDPROGRESS);
+        printf(FOUND_PROGRESS_MSG);
         ++attempts;
     }
     else
-        printf(NEWGAMEMSG);
+        printf(NEW_GAME_MSG);
 
     int newValueX, newValueY; //store cell to highlight
-    if(occupiedCells < SQUAREAMOUNT * SQUAREAMOUNT && initializeNewValues)
+    if(occupiedCells < SQUARE_AMOUNT * SQUARE_AMOUNT && initializeNewValues)
         initializeNewValue(board, 3, &occupiedCells, &newValueX, &newValueY, &biggestTile);
 
     newValueX = -1, newValueY = -1;
@@ -440,8 +425,8 @@ int main(){
 
 
     while (1) {
-        if (occupiedCells == SQUAREAMOUNT * SQUAREAMOUNT && gameEnds(board)) {
-            printf(ENDMSG);
+        if (occupiedCells == SQUARE_AMOUNT * SQUARE_AMOUNT && gameEnds(board)) {
+            printf(GAME_END_MSG);
             highScore = currentScore > highScore ? currentScore : highScore;
             newGame(board, &occupiedCells, &currentScore, &newValueX, &newValueY, &biggestTile);
             saveProgress(board, occupiedCells, currentScore, highScore, attempts, biggestTile);
@@ -470,13 +455,13 @@ int main(){
                     boardMovesHorizontally(board, &occupiedCells, move, &newValueX, &newValueY, &currentScore, &biggestTile);
                 }
 
-                if (move == 'E') { // save and exit
+                if (move == SAVE_GAME) { // save and exit
                     saveProgress(board, occupiedCells, currentScore, highScore, attempts, biggestTile);
                     free(board);
                     break;
                 }
 
-                if (move == 'N') { // new game
+                if (move == START_NEW_GAME) { // new game
                     newGame(board, &occupiedCells, &currentScore, &newValueX, &newValueY, &biggestTile);
                 }
             } else {
@@ -484,10 +469,10 @@ int main(){
                 badInput = 1; // prints BAD INPUT
                 updateDisplay(board, highScore, currentScore, newValueX, newValueY, badInput, attempts, biggestTile);
             }
-            saveProgress(board, occupiedCells, currentScore, highScore, attempts, biggestTile);
+            saveProgress(board, occupiedCells, currentScore, highScore, attempts, biggestTile); //save progress in case user shuts down program
             system("cls"); // clears console
-            highScore = highScore > currentScore? highScore : currentScore;
-            updateDisplay(board, highScore, currentScore, newValueX, newValueY, badInput, attempts, biggestTile);
+            highScore = highScore > currentScore? highScore : currentScore; //keep track of high score
+            updateDisplay(board, highScore, currentScore, newValueX, newValueY, badInput, attempts, biggestTile); // update information shown on screen
         }
     }
     return 0;

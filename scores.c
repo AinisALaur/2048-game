@@ -6,15 +6,15 @@
 
 Achievement *sortByValues(int attempts, int highScore, int currentScore, int biggestTile){
     Achievement attemptsStruct = {ATTEMPTS, attempts};
-    Achievement highScoreStruct = {HIGHSCOREMSG, highScore};
-    Achievement currentScoreStruct = {SCOREMSG, currentScore};
-    Achievement biggestTileStruct = {BIGGESTTILE, biggestTile};
+    Achievement highScoreStruct = {HIGH_SCORE_MSG, highScore};
+    Achievement currentScoreStruct = {SCORE_MSG, currentScore};
+    Achievement biggestTileStruct = {BIGGEST_TILE, biggestTile};
 
 
     int size = 4;
     Achievement *Achievements = (Achievement*)malloc(size * sizeof(Achievement));
     if(Achievements == NULL){
-        printf(BADMEMORY);
+        printf(BAD_MEMORY);
         exit(0);
     }
     Achievements[0] = attemptsStruct;

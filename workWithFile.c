@@ -1,6 +1,7 @@
 //Author: Ainis Augustas Laurinavicius
 //Date: 2024/12/27
 #include<stdio.h>
+#include<time.h>
 #include "2048.h"
 
 long fileSize(FILE *file) {
@@ -17,9 +18,9 @@ long fileSize(FILE *file) {
 
 
 int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *attempts, int *biggestTile){
-    FILE* progressFile = fopen(FILENAME, "rb");
-    if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUAREAMOUNT * SQUAREAMOUNT + 5) {
-        fread(board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
+    FILE* progressFile = fopen(FILE_NAME, "rb");
+    if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUARE_AMOUNT * SQUARE_AMOUNT + 5) {
+        fread(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
         fread(occupiedCells, sizeof(int), 1, progressFile);
         fread(currentScore, sizeof(int), 1, progressFile);
         fread(highScore, sizeof(int), 1, progressFile);
@@ -35,9 +36,9 @@ int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highSco
 
 void saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int attempts, int biggestTile){
     if(board != NULL){
-        FILE* progressFile = fopen(FILENAME, "wb");
+        FILE* progressFile = fopen(FILE_NAME, "wb");
         if (progressFile != NULL) {
-            fwrite(board, sizeof(int), SQUAREAMOUNT * SQUAREAMOUNT, progressFile);
+            fwrite(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
             fwrite(&occupiedCells, sizeof(int), 1, progressFile);
             fwrite(&currentScore, sizeof(int), 1, progressFile);
             fwrite(&highScore, sizeof(int), 1, progressFile);
@@ -45,5 +46,16 @@ void saveProgress(int *board, int occupiedCells, int currentScore, int highScore
             fwrite(&biggestTile, sizeof(int), 1, progressFile);
             fclose(progressFile);
         }
+    }
+}
+
+void timeSpent() {
+    int end = clock();
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    char message[] = TIME_LOG_MSG;
+    FILE *file = fopen(TIME_LOG_FILE, "a");
+    if (file != NULL) {
+        fprintf(file, "%s%lf\n", message, time_taken);
+        fclose(file);
     }
 }
