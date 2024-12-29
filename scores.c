@@ -2,8 +2,9 @@
 //Date: 2024/12/29
 //Description: 2048 game's module for sorting achievements in descending order
 
-##include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "2048.h"
 
 Achievement *sortByValues(int attempts, int highScore, int currentScore, int biggestTile) {
@@ -13,8 +14,7 @@ Achievement *sortByValues(int attempts, int highScore, int currentScore, int big
     Achievement currentScoreStruct = {SCORE_MSG, currentScore};
     Achievement biggestTileStruct = {BIGGEST_TILE, biggestTile};
 
-    int size = 4; // SIZE OF THE ACHIEVEMENTS ARRAY
-    Achievement *Achievements = (Achievement*)malloc(size * sizeof(Achievement)); // ALLOCATE MEMORY FOR ACHIEVEMENTS
+    Achievement *Achievements = (Achievement*)malloc(sizeof(Achievement)); // ALLOCATE MEMORY FOR ACHIEVEMENTS
 
     if (Achievements == NULL) { // CHECK IF MEMORY ALLOCATION FAILED
         free(Achievements); // FREE MEMORY IN CASE OF FAILURE
@@ -23,10 +23,19 @@ Achievement *sortByValues(int attempts, int highScore, int currentScore, int big
 
     // INITIALIZE THE ACHIEVEMENTS ARRAY
     Achievements[0] = attemptsStruct;
+    Achievements = (Achievement*)realloc(Achievements, 2 * sizeof(Achievement));// INCREASE CAPACITY FOR EACH NEW ACHIEVEMENT
     Achievements[1] = highScoreStruct;
+    Achievements = (Achievement*)realloc(Achievements, 3 * sizeof(Achievement));// INCREASE CAPACITY FOR EACH NEW ACHIEVEMENT
     Achievements[2] = currentScoreStruct;
+    Achievements = (Achievement*)realloc(Achievements, 4 * sizeof(Achievement));// INCREASE CAPACITY FOR EACH NEW ACHIEVEMENT
     Achievements[3] = biggestTileStruct;
 
+    if (Achievements == NULL) {
+        free(Achievements);
+        return NULL;
+    }
+
+    int size = 4;
     // SORT THE ACHIEVEMENTS BY VALUE IN DESCENDING ORDER
     for (int i = 0; i < size; ++i) {
         for (int x = i + 1; x < size; ++x) {
@@ -37,7 +46,7 @@ Achievement *sortByValues(int attempts, int highScore, int currentScore, int big
             }
         }
     }
-
+    assert(Achievements[0].value >= Achievements[1].value); // TESTCASE 3
     return Achievements; // RETURN THE SORTED ACHIEVEMENTS
 }
 

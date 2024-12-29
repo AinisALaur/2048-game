@@ -1,6 +1,6 @@
 // AUTHOR: Ainis Augustas Laurinavicius
 // DATE: 2024/12/29
-// DESCRIPTION: 2048 GAME'S MAIN PROGRAM FILE
+// DESCRIPTION: 2048 game's main program file
 
 #include <stdio.h>
 #include <stdlib.h> // READ AND WRITE FILES
@@ -9,6 +9,7 @@
 #include <windows.h> // TO HANDLE UNEXPECTED PROGRAM SHUTDOWN
 #include <conio.h>   // TRACK KEYBOARD EVENTS
 #include <ctype.h>   // FOR FUNCTION TOUPPER()
+#include <assert.h> // TO CHECK TESTCASES
 #include "2048.h"  // HEADER FILE
 
 // BASIC SETTINGS
@@ -111,6 +112,7 @@ int drawBoard(int *board, int newValueX, int newValueY, int currentScore, int ba
 
                         // CALCULATE PADDING TO ALIGN NUMBER TO CENTER
                         int cellWidth = SQUARE_SIZE - 1;
+                        assert(getNumSize(1234) == 4); // TESTCASE 1
                         int sizeOfNum = getNumSize(*(board + SQUARE_AMOUNT * j + x));
                         int leftPadding = (cellWidth - sizeOfNum) / 2;
                         int rightPadding = cellWidth - leftPadding - sizeOfNum;
@@ -284,7 +286,6 @@ int moveVertically(int *board, int *occupiedCells, char direction, int *newValue
                             int new_value = *(board + SQUARE_AMOUNT * y + x);
                             *(board + SQUARE_AMOUNT * y + x) = 0;
                             int Yvalue = direction == UP ? y1 + 1 : y1 - 1;
-
                             *(board + SQUARE_AMOUNT * Yvalue + x) = new_value;
                             *(movedCells + SQUARE_AMOUNT * Yvalue + x) = 1; // MAKE SURE TO NOT MOVE ALREADY MOVED VALUES
                             break;

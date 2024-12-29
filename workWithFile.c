@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 #include "2048.h"
 
 #define EXPECTED_FILE_SIZE SQUARE_AMOUNT * SQUARE_AMOUNT + 5
@@ -24,6 +25,8 @@ long fileSize(FILE *file) {
 int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *biggestTile) {
     if (board != NULL && occupiedCells != NULL && currentScore != NULL && highScore != NULL && biggestTile != NULL) {
         FILE *progressFile = fopen(FILE_NAME, "rb"); // OPEN FILE IN READ-BINARY MODE
+        FILE *nonExistentFile = fopen("", "rb");
+        assert(fileSize(nonExistentFile) == -1); // TESTCASE 2
         if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == EXPECTED_FILE_SIZE) { // CHECK IF EXPECTED NUMBER OF INFO IS INSIDE
             fread(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile); // READ BOARD DATA
             fread(occupiedCells, sizeof(int), 1, progressFile); // READ OCCUPIED CELLS
