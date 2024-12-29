@@ -1,6 +1,8 @@
 //Author: Ainis Augustas Laurinavicius
-//Date: 2024/12/27
+//Date: 2024/12/29
+
 #include<stdio.h>
+#include<stdlib.h>
 #include<time.h>
 #include "2048.h"
 
@@ -16,11 +18,10 @@ long fileSize(FILE *file) {
     }
 }
 
-
 int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *biggestTile){
     if(board != NULL && occupiedCells != NULL && currentScore != NULL && highScore != NULL && initializeNewValues != NULL && biggestTile != NULL){
-        FILE* progressFile = fopen(FILE_NAME, "rb");
-        if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUARE_AMOUNT * SQUARE_AMOUNT + 5) {
+        FILE *progressFile = fopen(FILE_NAME, "rb");
+        if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUARE_AMOUNT * SQUARE_AMOUNT + 5) {//check if expected number of info is inside
             fread(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
             fread(occupiedCells, sizeof(int), 1, progressFile);
             fread(currentScore, sizeof(int), 1, progressFile);
@@ -38,10 +39,9 @@ int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highSco
         return -1;
 }
 
-
 int saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile){
     if(board != NULL){
-        FILE* progressFile = fopen(FILE_NAME, "wb");
+        FILE *progressFile = fopen(FILE_NAME, "wb");
         if (progressFile != NULL) {
             fwrite(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
             fwrite(&occupiedCells, sizeof(int), 1, progressFile);

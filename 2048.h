@@ -1,15 +1,19 @@
 //Author: Ainis Augustas Laurinavicius
-//Date: 2024/12/27
+//Date: 2024/12/29
+
 #ifndef GAME2048_H
 #define GAME2048_H
 #include<time.h>
+
 int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *biggestTile);
 long fileSize(FILE *file);
 int saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile);
+
 typedef struct{
     char name[30];
     int value;
 }Achievement;
+
 Achievement *sortByValues(int attempts, int highScore, int currentScore, int biggestTile);
 void timeSpent();
 
@@ -25,6 +29,8 @@ void timeSpent();
 #define BIGGEST_TILE "ALL TIME BIGGEST TILE: "
 #define BAD_MEMORY "MEMORY ALLOCATION FAILED"
 #define TIME_LOG_MSG "On attempt %d total time playing in seconds: %.3lf\n"
+
+//global variables for atexit() to work
 extern clock_t start;
 extern int attempts;
 #endif

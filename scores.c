@@ -1,5 +1,6 @@
 //Author: Ainis Augustas Laurinavicius
-//Date: 2024/12/27
+//Date: 2024/12/29
+
 #include<stdio.h>
 #include<stdlib.h>
 #include "2048.h"
@@ -13,6 +14,7 @@ Achievement *sortByValues(int attempts, int highScore, int currentScore, int big
     int size = 4;
     Achievement *Achievements = (Achievement*)malloc(size * sizeof(Achievement));
     if(Achievements == NULL){
+        free(Achievements);
         return NULL;
     }
     Achievements[0] = attemptsStruct;
