@@ -185,6 +185,44 @@ int initializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *
         return -1;
 }
 
+int moveAllCellsVertically(int *board, int *occupiedCells, char direction){
+    if(board != NULL && occupiedCells != NULL){
+        //assign appropriate y value for upcoming loop
+        int y = direction == UP ? 1 : SQUARE_AMOUNT - 2;
+        //Move all elements up/down
+        while(1){ // start at second row from top and progress down or second row from bottom
+            //break function when needed
+            if(direction == UP && y > SQUARE_AMOUNT - 1 || direction == DOWN && y < 0){
+                break;
+            }
+            for(int x = 0; x < SQUARE_AMOUNT; ++x){ // go through all row's elements
+                int cellValue = *(board + SQUARE_AMOUNT * y + x);
+                if(cellValue != 0){ // if element is not zero move it as high/low up as possible
+                    *(board + SQUARE_AMOUNT * y + x) = 0;
+                    int ValuesYcord;
+                    if(direction == UP){
+                        ValuesYcord = 0;
+                        while(*(board + SQUARE_AMOUNT * ValuesYcord + x) != 0) // increasing it's y coordinate to the maximum
+                            ValuesYcord++;
+                    }
+                    else{
+                        ValuesYcord = SQUARE_AMOUNT - 1;
+                        while(*(board + SQUARE_AMOUNT * ValuesYcord + x) != 0) // decreasing it's y coordinate to the maximum
+                            ValuesYcord--;
+                    }
+
+                    *(board + SQUARE_AMOUNT * ValuesYcord + x) = cellValue;
+                }
+            }
+           // move up a row or down
+           direction == UP ? ++y : --y;
+        }
+        return 1;
+    }
+    else
+        return -1;
+}
+
 int moveVertically(int *board, int *occupiedCells, char direction, int *newValueX, int *newValueY, int *currentScore, int *biggestTile){
     if(board != NULL && occupiedCells != NULL && newValueX != NULL && newValueY != NULL && currentScore != NULL && biggestTile != NULL){
         int *movedCells = (int *)calloc(SQUARE_AMOUNT * SQUARE_AMOUNT, sizeof(int));
@@ -202,7 +240,6 @@ int moveVertically(int *board, int *occupiedCells, char direction, int *newValue
         memcpy(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int));
 
         while(1){ //starts at bottom row and progresses up
-
             //check when to stop cycle
             if(direction == UP && y <= 0 || direction == DOWN && y >= SQUARE_AMOUNT - 1){
                 break;
@@ -246,44 +283,12 @@ int moveVertically(int *board, int *occupiedCells, char direction, int *newValue
                     }
                 }
             }
-
             //move up or down
             direction == UP ? --y : ++y;
         }
 
-        //assign appropriate i value for upcoming loop
-        y = direction == UP ? 1 : SQUARE_AMOUNT - 2;
-
-        //Move all elements up/down
-        while(1){ // start at second row from top and progress down or second row from bottom
-
-            //break function when needed
-            if(direction == UP && y > SQUARE_AMOUNT - 1 || direction == DOWN && y < 0){
-                break;
-            }
-
-            for(int x = 0; x < SQUARE_AMOUNT; ++x){ // go through all row's elements
-                int cellValue = *(board + SQUARE_AMOUNT * y + x);
-                if(cellValue != 0){ // if element is not zero move it as high/low up as possible
-                    *(board + SQUARE_AMOUNT * y + x) = 0;
-                    int ValuesYcord;
-                    if(direction == UP){
-                        ValuesYcord = 0;
-                        while(*(board + SQUARE_AMOUNT * ValuesYcord + x) != 0) // increasing it's y coordinate to the maximum
-                            ValuesYcord++;
-                    }
-                    else{
-                        ValuesYcord = SQUARE_AMOUNT - 1;
-                        while(*(board + SQUARE_AMOUNT * ValuesYcord + x) != 0) // decreasing it's y coordinate to the maximum
-                            ValuesYcord--;
-                    }
-
-                    *(board + SQUARE_AMOUNT * ValuesYcord + x) = cellValue;
-                }
-            }
-           // move up a row or down
-           direction == UP ? ++y : --y;
-        }
+        if(moveAllCellsVertically(board, occupiedCells, direction) == -1)
+            return -1;
 
         if(memcmp(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int)) != 0)
             initializeNewValue(board, 1, occupiedCells, newValueX, newValueY, biggestTile); // add new value to board
@@ -295,6 +300,49 @@ int moveVertically(int *board, int *occupiedCells, char direction, int *newValue
         return -1;
 }
 
+
+int moveAllCellsHorizontally(int *board, int *occupiedCells, char direction){
+        if(board != NULL && occupiedCells != NULL){
+             int x = direction == LEFT ? 1 : SQUARE_AMOUNT - 2;
+             while(1){
+                if(direction == LEFT && x > SQUARE_AMOUNT - 1 || direction == RIGHT && x < 0)
+                    break;
+
+                for(int y = 0; y < SQUARE_AMOUNT; ++y){
+                    if(*(board + SQUARE_AMOUNT * y + x) != 0){
+                        int value = *(board + SQUARE_AMOUNT * y + x);
+                        *(board + SQUARE_AMOUNT * y + x) = 0;
+
+                        int xcor;
+
+                        if(direction == LEFT){
+                            xcor = 0;
+                            //decrease x coordinate to the maximum (move left)
+                            while(*(board + SQUARE_AMOUNT * y + xcor) != 0 && xcor < SQUARE_AMOUNT - 1){
+                                xcor++;
+                            }
+                        }
+
+                        if(direction == RIGHT){
+                            xcor = SQUARE_AMOUNT - 1;
+                            //increase x coordinate to the maximum (move left)
+                                while(*(board + SQUARE_AMOUNT * y + xcor) != 0 && xcor > 0){
+                                    xcor--;
+                                }
+                            }
+
+                        *((int *)board + SQUARE_AMOUNT * y + xcor) = value;
+                    }
+                }
+                direction == LEFT ? ++x : --x;
+             }
+             return 1;
+        }
+        else
+            return -1;
+}
+
+
 int moveHorizontally(int *board, int *occupiedCells, char direction, int *newValueX, int *newValueY, int *currentScore, int *biggestTile){
     if(board != NULL && occupiedCells != NULL && newValueX != NULL && newValueY != NULL && currentScore != NULL && biggestTile != NULL){
         int *movedCells = (int *)calloc(SQUARE_AMOUNT * SQUARE_AMOUNT, sizeof(int));
@@ -303,21 +351,16 @@ int moveHorizontally(int *board, int *occupiedCells, char direction, int *newVal
             return -1;
         }
 
-
         int x = direction == LEFT ? SQUARE_AMOUNT - 1 : 0;
-
         int *initialBoard = (int *)malloc(SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int));
         if(initialBoard == NULL){
             free(initialBoard);
             return -1;
         }
-
         memcpy(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int));
-
 
         //move left or right
         while(1){
-
             if(direction == LEFT && x < 1 || direction == RIGHT && x > SQUARE_AMOUNT - 1)
                 break;
 
@@ -359,40 +402,9 @@ int moveHorizontally(int *board, int *occupiedCells, char direction, int *newVal
 
          }
 
-         x = direction == LEFT ? 1 : SQUARE_AMOUNT - 2;
+        if(moveAllCellsHorizontally(board, occupiedCells, direction) == -1)
+            return -1;
 
-         while(1){
-            if(direction == LEFT && x > SQUARE_AMOUNT - 1 || direction == RIGHT && x < 0)
-                break;
-
-            for(int y = 0; y < SQUARE_AMOUNT; ++y){
-                if(*(board + SQUARE_AMOUNT * y + x) != 0){
-                    int value = *(board + SQUARE_AMOUNT * y + x);
-                    *(board + SQUARE_AMOUNT * y + x) = 0;
-
-                    int xcor;
-
-                    if(direction == LEFT){
-                        xcor = 0;
-                        //decrease x coordinate to the maximum (move left)
-                        while(*(board + SQUARE_AMOUNT * y + xcor) != 0 && xcor < SQUARE_AMOUNT - 1){
-                            xcor++;
-                        }
-                    }
-
-                    if(direction == RIGHT){
-                        xcor = SQUARE_AMOUNT - 1;
-                        //increase x coordinate to the maximum (move left)
-                            while(*(board + SQUARE_AMOUNT * y + xcor) != 0 && xcor > 0){
-                                xcor--;
-                            }
-                        }
-
-                    *((int *)board + SQUARE_AMOUNT * y + xcor) = value;
-                }
-            }
-            direction == LEFT ? ++x : --x;
-         }
 
         if(memcmp(initialBoard, board, SQUARE_AMOUNT * SQUARE_AMOUNT * sizeof(int)) != 0)
             initializeNewValue(board, 1, occupiedCells, newValueX, newValueY, biggestTile); // add new value to board
@@ -458,8 +470,9 @@ int main(){
     atexit(timeSpent); //log time spent playing
     srand(time(NULL)); //update seed for random values
 
-    if(readFromFile(board, &occupiedCells, &currentScore, &highScore, &initializeNewValues, &biggestTile)){
+    if(readFromFile(board, &occupiedCells, &currentScore, &highScore, &biggestTile)){
         printf(FOUND_PROGRESS_MSG);
+        initializeNewValues = 0;
         ++attempts;
     }
     else

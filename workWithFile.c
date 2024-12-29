@@ -1,5 +1,6 @@
 //Author: Ainis Augustas Laurinavicius
 //Date: 2024/12/29
+//Description: 2048 game's module for reading and writing from/to files
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -18,8 +19,8 @@ long fileSize(FILE *file) {
     }
 }
 
-int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *biggestTile){
-    if(board != NULL && occupiedCells != NULL && currentScore != NULL && highScore != NULL && initializeNewValues != NULL && biggestTile != NULL){
+int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *biggestTile){
+    if(board != NULL && occupiedCells != NULL && currentScore != NULL && highScore != NULL && biggestTile != NULL){
         FILE *progressFile = fopen(FILE_NAME, "rb");
         if (progressFile != NULL && fileSize(progressFile) / sizeof(int) == SQUARE_AMOUNT * SQUARE_AMOUNT + 5) {//check if expected number of info is inside
             fread(board, sizeof(int), SQUARE_AMOUNT * SQUARE_AMOUNT, progressFile);
@@ -29,7 +30,6 @@ int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highSco
             fread(&attempts, sizeof(int), 1, progressFile);
             fread(biggestTile, sizeof(int), 1, progressFile);
             fclose(progressFile);
-            *initializeNewValues = 0;
             return 1;
         }
         else

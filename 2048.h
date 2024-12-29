@@ -1,11 +1,12 @@
 //Author: Ainis Augustas Laurinavicius
 //Date: 2024/12/29
+//Description: 2048 game's header file
 
 #ifndef GAME2048_H
 #define GAME2048_H
 #include<time.h>
 
-int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *initializeNewValues, int *biggestTile);
+int readFromFile(int *board, int *occupiedCells, int *currentScore, int *highScore, int *biggestTile);
 long fileSize(FILE *file);
 int saveProgress(int *board, int occupiedCells, int currentScore, int highScore, int biggestTile);
 

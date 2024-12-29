@@ -1,5 +1,6 @@
 //Author: Ainis Augustas Laurinavicius
 //Date: 2024/12/29
+//Description: 2048 game's module for sorting achievements in descending order
 
 #include<stdio.h>
 #include<stdlib.h>
