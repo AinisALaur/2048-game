@@ -1,5 +1,5 @@
 //Author: Ainis Augustas Laurinavicius
-//Date: 2024/12/29
+// DATE: 2024/12/30
 //Description: 2048 game's header file
 
 #ifndef GAME2048_H

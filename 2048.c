@@ -1,5 +1,5 @@
 // AUTHOR: Ainis Augustas Laurinavicius
-// DATE: 2024/12/29
+// DATE: 2024/12/30
 // DESCRIPTION: 2048 game's main program file
 
 #include <stdio.h>
@@ -100,6 +100,7 @@ void drawLine(int length) {
     printf("-\n");
 }
 
+// DISPLAY PLAYER'S ACHIEVEMENTS/ BAD INPUT MESSAGE
 int displayAchievements(int currentScore, int highScore, int biggestTile, int badInput, Achievement *achievements, int j, int i){
     if(achievements != NULL){
         achievements = sortByValues(attempts, highScore, currentScore, biggestTile); // SORT achievements IN DESCENDING ORDER
@@ -164,8 +165,8 @@ int drawBoard(int *board, int newValueX, int newValueY, int currentScore, int ba
                     }
                 }
 
-                // DISPLAY PLAYER'S ACHIEVEMENTS/ BAD INPUT MESSAGE
-                displayAchievements(currentScore, highScore, biggestTile, badInput, achievements, j, i);
+                if(displayAchievements(currentScore, highScore, biggestTile, badInput, achievements, j, i) == -1)
+                    return -1;
             }
         }
 
@@ -178,7 +179,7 @@ int drawBoard(int *board, int newValueX, int newValueY, int currentScore, int ba
 
 // ADDS INITIAL VALUES AND EXTRA VALUE AFTER A VALID MOVE
 int initializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *newValueX, int *newValueY, int *biggestTile) {
-    if (board != NULL && newValueX != NULL && newValueY != NULL && newValueX != NULL && biggestTile != NULL) {
+    if (board != NULL && occupiedCells != NULL && newValueX != NULL && newValueY != NULL && biggestTile != NULL) {
         int x, y;
         for (int i = 0; i < NumberOfValues; ++i) {
             int IsOccupied = 1;
@@ -202,6 +203,20 @@ int initializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *
     } else {
         return -1;
     }
+}
+
+
+int joinCells(int x1, int y1, int x2, int y2, int *currentScore, int *board, int *occupiedCells, int *movedCells, int *biggestTile){
+    if(board != NULL && movedCells != NULL && occupiedCells != NULL && currentScore != NULL && biggestTile != NULL){
+        *currentScore += (*(board + SQUARE_AMOUNT * y1 + x1)) * 2;
+        *(board + SQUARE_AMOUNT * y2 + x2) = (*(board + SQUARE_AMOUNT * y1 + x1)) * 2;
+        *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y1 + x2) ? *biggestTile : *(board + SQUARE_AMOUNT * y1 + x2);
+        *(board + SQUARE_AMOUNT * y1 + x1) = 0;
+        (*occupiedCells)--;
+        *(movedCells + SQUARE_AMOUNT * y2 + x2) = 1;
+    }
+    else
+        return -1;
 }
 
 // MOVES ALL CELLS UP OR DOWN AS FAR AS IT CAN
@@ -257,24 +272,12 @@ int checkCellsVertically(char direction, int *board, int *biggestTile, int *occu
 
             // IF FINDS THE SAME ELEMENT ABOVE IT
             if (*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) == *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                *currentScore += (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
-                *(board + SQUARE_AMOUNT * y1 + x) = (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
-                *(board + SQUARE_AMOUNT * y + x) = 0;
-                *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y1 + x) ? *biggestTile : *(board + SQUARE_AMOUNT * y1 + x);
-                (*occupiedCells)--;
-                *(movedCells + SQUARE_AMOUNT * y1 + x) = 1; // MAKE SURE TO NOT MOVE ALREADY MOVED VALUES
+                if(joinCells(x, y, x, y1, currentScore, board, occupiedCells, movedCells, biggestTile) == -1)
+                    return -1;
                 break;
             }
-
-            // IF FINDS A NON-ZERO ELEMENT THAT IS NOT EQUAL TO ORIGINAL
-            else if (*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) != *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                int new_value = *(board + SQUARE_AMOUNT * y + x);
-                *(board + SQUARE_AMOUNT * y + x) = 0;
-                int Yvalue = direction == UP ? y1 + 1 : y1 - 1;
-                *(board + SQUARE_AMOUNT * Yvalue + x) = new_value;
-                *(movedCells + SQUARE_AMOUNT * Yvalue + x) = 1; // MAKE SURE TO NOT MOVE ALREADY MOVED VALUES
+            else if (*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) != *(board + SQUARE_AMOUNT * y + x))
                 break;
-            }
 
             // MOVE TO UPPER OR LOWER ROW
             direction == UP ? --y1 : ++y1;
@@ -380,24 +383,12 @@ int checkCellsHorizontally(char direction, int *board, int *occupiedCells, int *
                 break;
 
             if (*((int *)board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) == *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                *currentScore += (*(board + SQUARE_AMOUNT * y + x)) * 2;
-                *(board + SQUARE_AMOUNT * y + x1) = (*(board + SQUARE_AMOUNT * y + x)) * 2;
-                *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y + x1) ? *biggestTile : *(board + SQUARE_AMOUNT * y + x1);
-                *(board + SQUARE_AMOUNT * y + x) = 0;
-                (*occupiedCells)--;
-                *(movedCells + SQUARE_AMOUNT * y + x1) = 1;
+                if(joinCells(x, y, x1, y, currentScore, board, occupiedCells, movedCells, biggestTile) == -1)
+                    return -1;
                 break;
             }
-
-            if (*(board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) != *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                int value = *(board + 4 * y + x);
-                *(board + SQUARE_AMOUNT * y + x) = 0;
-                int Xvalue = direction == LEFT ? x1 + 1 : x1 - 1;
-
-                *(board + SQUARE_AMOUNT * y + Xvalue) = value;
-                *(movedCells + SQUARE_AMOUNT * y + Xvalue) = 1;
+            else if(*((int *)board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) != *(board + SQUARE_AMOUNT * y + x))
                 break;
-            }
 
             direction == LEFT ? --x1 : ++x1;
         }
@@ -477,7 +468,9 @@ int updateDisplay(int *board, int highScore, int currentScore, int newValueX, in
 }
 
 void endGameError(int *board) {
-    free(board);
+    if (board != NULL) {
+        free(board);
+    }
     printf(GAME_ERROR_MSG);
     exit(0);
 }
