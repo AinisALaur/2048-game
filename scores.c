@@ -49,7 +49,3 @@ Achievement *sortByValues(int attempts, int highScore, int currentScore, int big
     assert(Achievements[0].value >= Achievements[1].value); // TESTCASE 3
     return Achievements; // RETURN THE SORTED ACHIEVEMENTS
 }
-
-
-
-

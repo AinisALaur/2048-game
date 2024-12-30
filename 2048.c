@@ -100,15 +100,48 @@ void drawLine(int length) {
     printf("-\n");
 }
 
+int displayAchievements(int currentScore, int highScore, int biggestTile, int badInput, Achievement *achievements, int j, int i){
+    if(achievements != NULL){
+        achievements = sortByValues(attempts, highScore, currentScore, biggestTile); // SORT achievements IN DESCENDING ORDER
+        if (achievements == NULL) { // CHECK IF MEMORY ALLOCATION WAS SUCCESSFUL INSIDE FUNCTION
+            return -1;
+        }
+
+        if (j == 0 && i == 0)
+            printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, achievements[0].name, achievements[0].value, COLOR_RESET);
+        else if (j == 0 && i == 1)
+            printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, achievements[1].name, achievements[1].value, COLOR_RESET);
+        else if (j == 0 && i == 2)
+            printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, achievements[2].name, achievements[2].value, COLOR_RESET);
+        else if (j == 0 && i == 3)
+            printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, achievements[3].name, achievements[3].value, COLOR_RESET);
+        else if (j == 2 && i == 1 && badInput)
+            printf("|  %s%s%s\n", BAD_INPUT_COLOR, BAD_INPUT_MSG, COLOR_RESET);
+        else
+            printf("|\n");
+
+        free(achievements);
+        return 1;
+    }
+    else
+        return -1;
+}
+
+
 // DRAW GAME BOARD
 int drawBoard(int *board, int newValueX, int newValueY, int currentScore, int badInput, int highScore, int biggestTile) {
     if (board != NULL) {
+        Achievement *achievements = (Achievement *)malloc(4 * sizeof(Achievement));
+        if (achievements == NULL) {
+            return -1; // IF MEMORY ALLOCATION FAILED
+        }
+
         for (int j = 0; j < SQUARE_AMOUNT; ++j) {
             drawLine(SQUARE_SIZE);
 
             for (int i = 0; i < SQUARE_SIZE / 2; ++i) {
                 for (int x = 0; x < SQUARE_AMOUNT; ++x) {
-                    if (i == SQUARE_SIZE / 4 && *(board + SQUARE_AMOUNT * j + x) != 0) {
+                    if (i == SQUARE_SIZE / 4 && *(board + SQUARE_AMOUNT * j + x) != 0) {// IF WE FIND THE CELL'S MIDDLE
 
                         // CALCULATE PADDING TO ALIGN NUMBER TO CENTER
                         int cellWidth = SQUARE_SIZE - 1;
@@ -131,30 +164,8 @@ int drawBoard(int *board, int newValueX, int newValueY, int currentScore, int ba
                     }
                 }
 
-                Achievement *Achievements = (Achievement *)malloc(4 * sizeof(Achievement));
-                if (Achievements == NULL) {
-                    return -1; // IF MEMORY ALLOCATION FAILED
-                }
-
-                Achievements = sortByValues(attempts, highScore, currentScore, biggestTile); // SORT ACHIEVEMENTS IN DESCENDING ORDER
-                if (Achievements == NULL) { // CHECK IF MEMORY ALLOCATION WAS SUCCESSFUL INSIDE FUNCTION
-                    return -1;
-                }
-
-                if (j == 0 && i == 0)
-                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[0].name, Achievements[0].value, COLOR_RESET);
-                else if (j == 0 && i == 1)
-                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[1].name, Achievements[1].value, COLOR_RESET);
-                else if (j == 0 && i == 2)
-                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[2].name, Achievements[2].value, COLOR_RESET);
-                else if (j == 0 && i == 3)
-                    printf("|  %s%s%d%s\n", ACHIEVEMENT_COLOR, Achievements[3].name, Achievements[3].value, COLOR_RESET);
-                else if (j == 2 && i == 1 && badInput)
-                    printf("|  %s%s%s\n", BAD_INPUT_COLOR, BAD_INPUT_MSG, COLOR_RESET);
-                else
-                    printf("|\n");
-
-                free(Achievements);
+                // DISPLAY PLAYER'S ACHIEVEMENTS/ BAD INPUT MESSAGE
+                displayAchievements(currentScore, highScore, biggestTile, badInput, achievements, j, i);
             }
         }
 
@@ -193,7 +204,7 @@ int initializeNewValue(int *board, int NumberOfValues, int *occupiedCells, int *
     }
 }
 
-// MOVE ALL CELLS VERTICALLY
+// MOVES ALL CELLS UP OR DOWN AS FAR AS IT CAN
 int moveAllCellsVertically(int *board, int *occupiedCells, char direction) {
     if (board != NULL && occupiedCells != NULL) {
         // ASSIGN APPROPRIATE Y VALUE FOR THE UPCOMING LOOP
@@ -235,6 +246,44 @@ int moveAllCellsVertically(int *board, int *occupiedCells, char direction) {
     }
 }
 
+// CHECK CELLS ABOVE OR BELOW TO SEE IF THEY JOIN OR NOT
+int checkCellsVertically(char direction, int *board, int *biggestTile, int *occupiedCells, int *movedCells, int *currentScore, int x, int y){
+    if(board != NULL && occupiedCells != NULL && currentScore != NULL && biggestTile != NULL && movedCells != NULL){
+        int y1 = direction == UP ? y - 1 : y + 1;
+        while (1) { // LOOP THAT CHECKS ALL ELEMENTS ABOVE/BELOW
+            if (direction == UP && y1 < 0 || direction == DOWN && y1 > SQUARE_AMOUNT - 1) {
+                break;
+            }
+
+            // IF FINDS THE SAME ELEMENT ABOVE IT
+            if (*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) == *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
+                *currentScore += (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
+                *(board + SQUARE_AMOUNT * y1 + x) = (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
+                *(board + SQUARE_AMOUNT * y + x) = 0;
+                *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y1 + x) ? *biggestTile : *(board + SQUARE_AMOUNT * y1 + x);
+                (*occupiedCells)--;
+                *(movedCells + SQUARE_AMOUNT * y1 + x) = 1; // MAKE SURE TO NOT MOVE ALREADY MOVED VALUES
+                break;
+            }
+
+            // IF FINDS A NON-ZERO ELEMENT THAT IS NOT EQUAL TO ORIGINAL
+            else if (*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) != *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
+                int new_value = *(board + SQUARE_AMOUNT * y + x);
+                *(board + SQUARE_AMOUNT * y + x) = 0;
+                int Yvalue = direction == UP ? y1 + 1 : y1 - 1;
+                *(board + SQUARE_AMOUNT * Yvalue + x) = new_value;
+                *(movedCells + SQUARE_AMOUNT * Yvalue + x) = 1; // MAKE SURE TO NOT MOVE ALREADY MOVED VALUES
+                break;
+            }
+
+            // MOVE TO UPPER OR LOWER ROW
+            direction == UP ? --y1 : ++y1;
+        }
+        return 1;
+    }
+    else
+        return -1;
+}
 
 int moveVertically(int *board, int *occupiedCells, char direction, int *newValueX, int *newValueY, int *currentScore, int *biggestTile) {
     if (board != NULL && occupiedCells != NULL && newValueX != NULL && newValueY != NULL && currentScore != NULL && biggestTile != NULL) {
@@ -261,39 +310,9 @@ int moveVertically(int *board, int *occupiedCells, char direction, int *newValue
 
             for (int x = 0; x < SQUARE_AMOUNT; ++x) { // GOES THROUGH ROW'S ELEMENTS
                 if (*(board + SQUARE_AMOUNT * y + x) != 0) { // IF ELEMENT IS NOT 0, LOOK IF ANY NON-ZERO ELEMENTS EXIST ABOVE/BELOW
-
-                    // ASSIGN J ACCORDINGLY
-                    int y1 = direction == UP ? y - 1 : y + 1;
-
-                    while (1) { // LOOP THAT CHECKS ALL ELEMENTS ABOVE/BELOW
-                        if (direction == UP && y1 < 0 || direction == DOWN && y1 > SQUARE_AMOUNT - 1) {
-                            break;
-                        }
-
-                        // IF FINDS THE SAME ELEMENT ABOVE IT
-                        if (*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) == *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                            *currentScore += (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
-                            *(board + SQUARE_AMOUNT * y1 + x) = (*(board + SQUARE_AMOUNT * y1 + x)) * 2;
-                            *(board + SQUARE_AMOUNT * y + x) = 0;
-                            *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y1 + x) ? *biggestTile : *(board + SQUARE_AMOUNT * y1 + x);
-                            (*occupiedCells)--;
-                            *(movedCells + SQUARE_AMOUNT * y1 + x) = 1; // MAKE SURE TO NOT MOVE ALREADY MOVED VALUES
-                            break;
-                        }
-
-                        // IF FINDS A NON-ZERO ELEMENT THAT IS NOT EQUAL TO ORIGINAL
-                        else if (*(board + SQUARE_AMOUNT * y1 + x) != 0 && *(board + SQUARE_AMOUNT * y1 + x) != *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                            int new_value = *(board + SQUARE_AMOUNT * y + x);
-                            *(board + SQUARE_AMOUNT * y + x) = 0;
-                            int Yvalue = direction == UP ? y1 + 1 : y1 - 1;
-                            *(board + SQUARE_AMOUNT * Yvalue + x) = new_value;
-                            *(movedCells + SQUARE_AMOUNT * Yvalue + x) = 1; // MAKE SURE TO NOT MOVE ALREADY MOVED VALUES
-                            break;
-                        }
-
-                        // MOVE TO UPPER OR LOWER ROW
-                        direction == UP ? --y1 : ++y1;
-                    }
+                    // CHECK ELEMENTS ABOVE OR BELOW
+                    if(checkCellsVertically(direction, board, biggestTile, occupiedCells, movedCells, currentScore, x, y) == -1)
+                        return -1;
                 }
             }
             // MOVE UP OR DOWN
@@ -312,6 +331,7 @@ int moveVertically(int *board, int *occupiedCells, char direction, int *newValue
         return -1;
 }
 
+// MOVES ALL CELLS LET OR RIGHT AS FAR AS IT CAN
 int moveAllCellsHorizontally(int *board, int *occupiedCells, char direction) {
     if (board != NULL && occupiedCells != NULL) {
         int x = direction == LEFT ? 1 : SQUARE_AMOUNT - 2;
@@ -352,6 +372,41 @@ int moveAllCellsHorizontally(int *board, int *occupiedCells, char direction) {
         return -1;
 }
 
+int checkCellsHorizontally(char direction, int *board, int *occupiedCells, int *currentScore, int *biggestTile, int *movedCells, int x, int y){
+    if(board != NULL && occupiedCells != NULL && currentScore != NULL && biggestTile != NULL && movedCells != NULL){
+        int x1 = direction == LEFT ? x - 1 : x + 1;
+        while (1) {
+            if (direction == LEFT && x1 < 0 || direction == RIGHT && x1 > SQUARE_AMOUNT - 1)
+                break;
+
+            if (*((int *)board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) == *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
+                *currentScore += (*(board + SQUARE_AMOUNT * y + x)) * 2;
+                *(board + SQUARE_AMOUNT * y + x1) = (*(board + SQUARE_AMOUNT * y + x)) * 2;
+                *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y + x1) ? *biggestTile : *(board + SQUARE_AMOUNT * y + x1);
+                *(board + SQUARE_AMOUNT * y + x) = 0;
+                (*occupiedCells)--;
+                *(movedCells + SQUARE_AMOUNT * y + x1) = 1;
+                break;
+            }
+
+            if (*(board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) != *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
+                int value = *(board + 4 * y + x);
+                *(board + SQUARE_AMOUNT * y + x) = 0;
+                int Xvalue = direction == LEFT ? x1 + 1 : x1 - 1;
+
+                *(board + SQUARE_AMOUNT * y + Xvalue) = value;
+                *(movedCells + SQUARE_AMOUNT * y + Xvalue) = 1;
+                break;
+            }
+
+            direction == LEFT ? --x1 : ++x1;
+        }
+        return 1;
+    }
+    else
+        return -1;
+}
+
 int moveHorizontally(int *board, int *occupiedCells, char direction, int *newValueX, int *newValueY, int *currentScore, int *biggestTile) {
     if (board != NULL && occupiedCells != NULL && newValueX != NULL && newValueY != NULL && currentScore != NULL && biggestTile != NULL) {
         int *movedCells = (int *)calloc(SQUARE_AMOUNT * SQUARE_AMOUNT, sizeof(int));
@@ -375,33 +430,9 @@ int moveHorizontally(int *board, int *occupiedCells, char direction, int *newVal
 
             for (int y = 0; y < SQUARE_AMOUNT; ++y) {
                 if (*(board + SQUARE_AMOUNT * y + x) != 0) {
-                    int x1 = direction == LEFT ? x - 1 : x + 1;
-                    while (1) {
-                        if (direction == LEFT && x1 < 0 || direction == RIGHT && x1 > SQUARE_AMOUNT - 1)
-                            break;
-
-                        if (*((int *)board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) == *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                            *currentScore += (*(board + SQUARE_AMOUNT * y + x)) * 2;
-                            *(board + SQUARE_AMOUNT * y + x1) = (*(board + SQUARE_AMOUNT * y + x)) * 2;
-                            *biggestTile = (*biggestTile) > *(board + SQUARE_AMOUNT * y + x1) ? *biggestTile : *(board + SQUARE_AMOUNT * y + x1);
-                            *(board + SQUARE_AMOUNT * y + x) = 0;
-                            (*occupiedCells)--;
-                            *(movedCells + SQUARE_AMOUNT * y + x1) = 1;
-                            break;
-                        }
-
-                        if (*(board + SQUARE_AMOUNT * y + x1) != 0 && *(board + SQUARE_AMOUNT * y + x1) != *(board + SQUARE_AMOUNT * y + x) && *(movedCells + SQUARE_AMOUNT * y + x) == 0) {
-                            int value = *(board + 4 * y + x);
-                            *(board + SQUARE_AMOUNT * y + x) = 0;
-                            int Xvalue = direction == LEFT ? x1 + 1 : x1 - 1;
-
-                            *(board + SQUARE_AMOUNT * y + Xvalue) = value;
-                            *(movedCells + SQUARE_AMOUNT * y + Xvalue) = 1;
-                            break;
-                        }
-
-                        direction == LEFT ? --x1 : ++x1;
-                    }
+                    // CHECK CELLS HORIZONTALLY
+                    if(checkCellsHorizontally(direction, board, occupiedCells, currentScore, biggestTile, movedCells, x, y) == -1)
+                        return -1;
                 }
             }
 
