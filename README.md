@@ -13,8 +13,11 @@ This is a simple 2048 game application coded in the C programming language
 Download all files and run the following commands:
 
 gcc -c workWithFile.c -o workWithFile.o
+
 gcc -c scores.c -o scores.o
+
 gcc -c 2048.c -o 2048.o
+
 gcc -o program scores.o workWithFile.o 2048.o
 
 Finally run the *program.exe*
