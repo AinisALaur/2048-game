@@ -2,8 +2,8 @@
 
 ## Table of Contents
 - [About](#about)
-- [Installation & setup](#installation)
-- [Gameplay](#Gameplay)
+- [Installation & setup](#installation--setup)
+- [Gameplay](#gameplay)
 - [License](#license)
 
 ## About
