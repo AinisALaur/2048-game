@@ -10,7 +10,13 @@
 This is a simple 2048 game application coded in the C programming language
 
 ## Installation & setup
-Download all files and run the following commands:
+Download
+```bash
+# clone the repo
+git clone https://github.com/AinisALaur/2048-game.git
+```
+
+Run the following commands:
 
 gcc -c workWithFile.c -o workWithFile.o
 
